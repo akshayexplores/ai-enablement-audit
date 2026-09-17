@@ -28,7 +28,7 @@ A free audit that shows a company how much of its work AI could carry today, whe
 | Variable | Value |
 |---|---|
 | `SUPABASE_URL` | Project URL, e.g. `https://xxxx.supabase.co` |
-| `SUPABASE_SERVICE_ROLE_KEY` | Project settings → API keys → `service_role` / secret key. Server-only, never exposed to the browser. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Project settings → API keys → **New secret key** (name it `ai-enablement-audit`, so it can be revoked on its own). A legacy `service_role` key also works. Server-only, never exposed to the browser. |
 | `ADMIN_PASSWORD` | A long password (min 10 chars) for `/admin`. Changing it logs everyone out. |
 
 3. Deploy, open the site, take the audit with a test email, then check `/admin`.

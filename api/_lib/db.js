@@ -8,7 +8,11 @@ export function configured() {
 }
 
 function headers(extra = {}) {
-  return { apikey: KEY(), Authorization: `Bearer ${KEY()}`, 'Content-Type': 'application/json', ...extra };
+  const key = KEY();
+  // New Supabase secret keys (sb_secret_...) are not JWTs: send them only as `apikey`.
+  // Legacy service_role keys are JWTs and also go in the Authorization header.
+  const auth = key.startsWith('sb_') ? {} : { Authorization: `Bearer ${key}` };
+  return { apikey: key, ...auth, 'Content-Type': 'application/json', ...extra };
 }
 
 export async function rpc(fn, args) {
