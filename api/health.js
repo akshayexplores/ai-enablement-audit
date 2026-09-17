@@ -9,7 +9,9 @@ export default async function handler(req, res) {
   const out = {
     supabaseUrl: !url ? 'missing' : /^https:\/\/[a-z0-9]+\.supabase\.co\/?$/.test(url.trim()) ? 'ok' : 'unexpected format',
     supabaseKey: keyType,
-    adminPassword: !process.env.ADMIN_PASSWORD ? 'missing' : process.env.ADMIN_PASSWORD.length < 10 ? 'too short' : 'ok',
+    adminAllowedEmails: !process.env.ADMIN_ALLOWED_EMAILS ? 'missing' : 'ok',
+    adminSessionSecret: !process.env.ADMIN_SESSION_SECRET ? 'missing' : process.env.ADMIN_SESSION_SECRET.length < 20 ? 'too short' : 'ok',
+    resendApiKey: !process.env.RESEND_API_KEY ? 'missing' : 'ok',
     database: 'not checked',
   };
   if (url && key) {

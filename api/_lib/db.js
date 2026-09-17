@@ -31,6 +31,18 @@ export async function select(path) {
   return { ok: r.ok, status: r.status, data };
 }
 
+// Generic write (POST upsert / PATCH / DELETE) against a table, for server-only use.
+// `path` may include a query string, e.g. `vajra_admin_otp?on_conflict=email` or `vajra_admin_otp?email=eq.x`.
+export async function write(path, method, body) {
+  const prefer = method === 'POST' ? 'resolution=merge-duplicates,return=minimal' : 'return=minimal';
+  const r = await fetch(`${URL_()}/rest/v1/${path}`, {
+    method,
+    headers: headers({ Prefer: prefer }),
+    body: body != null ? JSON.stringify(body) : undefined,
+  });
+  return { ok: r.ok, status: r.status };
+}
+
 export async function readJson(req) {
   if (req.body && typeof req.body === 'object' && !Buffer.isBuffer(req.body)) return req.body;
   if (typeof req.body === 'string') return JSON.parse(req.body);
@@ -45,26 +57,32 @@ export async function readJson(req) {
   return JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}');
 }
 
-/* ---- admin session: signed, expiring cookie. No secrets stored in the browser. ---- */
+/* ---- admin allowlist ---- */
+export function allowedEmails() {
+  return String(process.env.ADMIN_ALLOWED_EMAILS || '')
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+export function isAllowedEmail(email) {
+  return allowedEmails().includes(String(email || '').trim().toLowerCase());
+}
+
+/* ---- admin session: signed, expiring cookie carrying the logged-in email. No secrets stored in the browser. ---- */
 const COOKIE = 'vajra_audit_admin';
 const WEEK = 7 * 24 * 3600;
 
 function signingKey() {
-  return crypto.createHash('sha256').update(`${process.env.ADMIN_PASSWORD || ''}::${KEY()}`).digest();
+  return crypto.createHash('sha256').update(`${process.env.ADMIN_SESSION_SECRET || ''}::${KEY()}`).digest();
 }
 
-export function passwordMatches(input) {
-  const want = process.env.ADMIN_PASSWORD || '';
-  if (!want || want.length < 10) return false;
-  const a = crypto.createHash('sha256').update(String(input || '')).digest();
-  const b = crypto.createHash('sha256').update(want).digest();
-  return crypto.timingSafeEqual(a, b);
-}
-
-export function sessionCookie() {
+export function sessionCookie(email) {
   const exp = Math.floor(Date.now() / 1000) + WEEK;
-  const sig = crypto.createHmac('sha256', signingKey()).update(String(exp)).digest('hex');
-  return `${COOKIE}=${exp}.${sig}; Path=/api/admin; HttpOnly; Secure; SameSite=Strict; Max-Age=${WEEK}`;
+  const e = Buffer.from(String(email || '').trim().toLowerCase()).toString('base64url');
+  const payload = `${exp}.${e}`;
+  const sig = crypto.createHmac('sha256', signingKey()).update(payload).digest('hex');
+  return `${COOKIE}=${payload}.${sig}; Path=/api/admin; HttpOnly; Secure; SameSite=Strict; Max-Age=${WEEK}`;
 }
 
 export function clearCookie() {
@@ -72,11 +90,16 @@ export function clearCookie() {
 }
 
 export function isAdmin(req) {
-  if (!process.env.ADMIN_PASSWORD) return false;
+  if (!process.env.ADMIN_SESSION_SECRET) return false;
   const raw = (req.headers.cookie || '').split(/;\s*/).find((c) => c.startsWith(`${COOKIE}=`));
   if (!raw) return false;
-  const [exp, sig] = raw.slice(COOKIE.length + 1).split('.');
+  const parts = raw.slice(COOKIE.length + 1).split('.');
+  if (parts.length !== 3) return false;
+  const [exp, e, sig] = parts;
   if (!exp || !sig || Number(exp) < Date.now() / 1000) return false;
-  const want = crypto.createHmac('sha256', signingKey()).update(String(exp)).digest('hex');
-  return want.length === sig.length && crypto.timingSafeEqual(Buffer.from(want), Buffer.from(sig));
+  const want = crypto.createHmac('sha256', signingKey()).update(`${exp}.${e}`).digest('hex');
+  if (want.length !== sig.length || !crypto.timingSafeEqual(Buffer.from(want), Buffer.from(sig))) return false;
+  let email = '';
+  try { email = Buffer.from(e, 'base64url').toString('utf8'); } catch { /* ignore */ }
+  return email ? { email } : false;
 }

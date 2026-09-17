@@ -1,4 +1,4 @@
-/* Vajra audit admin: login, list, detail, CSV export. Data comes from /api/admin/* (server checks the session cookie). */
+/* Vajra audit admin: OTP login, list, detail, CSV export. Data comes from /api/admin/* (server checks the session cookie). */
 const $ = (s) => document.querySelector(s);
 const escH = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 const fmtDate = (d) => d ? new Date(d).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
@@ -14,17 +14,41 @@ async function api(path, opts) {
   return { status: r.status, ok: r.ok, data };
 }
 
-function viewLogin(msg) {
+function viewLoginEmail(msg) {
   $('#navright').innerHTML = '';
   $('#root').innerHTML = `<form class="login" id="loginForm"><div class="eyebrow">Admin</div><h1>Log in</h1>
-    <label class="field"><span>Password</span><input type="password" id="pw" autocomplete="current-password" autofocus required></label>
+    <p class="help" style="margin-bottom:1rem">Enter your email and we'll send you a one-time code.</p>
+    <label class="field"><span>Email</span><input type="email" id="loginEmail" autocomplete="email" autofocus required></label>
     <div class="err" id="loginErr" role="alert">${escH(msg || '')}</div>
-    <div style="margin-top:.6rem"><button class="btn" type="submit" id="loginBtn">Log in</button></div></form>`;
-  $('#pw').focus();
+    <div style="margin-top:.6rem"><button class="btn" type="submit" id="loginBtn">Send code</button></div></form>`;
+  $('#loginEmail').focus();
   $('#loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+    const email = $('#loginEmail').value.trim();
     $('#loginBtn').disabled = true; $('#loginErr').textContent = '';
-    const r = await api('/api/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: $('#pw').value }) });
+    const r = await api('/api/admin/request-otp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+    $('#loginBtn').disabled = false;
+    if (r.ok) return viewLoginCode(email);
+    $('#loginErr').textContent = r.data.error || 'Could not send the code';
+  });
+}
+
+function viewLoginCode(email) {
+  $('#root').innerHTML = `<form class="login" id="codeForm"><div class="eyebrow">Admin</div><h1>Enter code</h1>
+    <p class="help" style="margin-bottom:1rem">We sent a 6-digit code to <b>${escH(email)}</b>. It expires in 10 minutes.</p>
+    <label class="field"><span>Code</span><input type="text" id="loginCode" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" autofocus required></label>
+    <div class="err" id="loginErr" role="alert"></div>
+    <div style="margin-top:.6rem;display:flex;gap:.9rem;align-items:center">
+      <button class="btn" type="submit" id="loginBtn">Log in</button>
+      <button class="link" type="button" id="backBtn">Use a different email</button>
+    </div></form>`;
+  $('#loginCode').focus();
+  $('#backBtn').onclick = () => viewLoginEmail();
+  $('#codeForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const code = $('#loginCode').value.trim();
+    $('#loginBtn').disabled = true; $('#loginErr').textContent = '';
+    const r = await api('/api/admin/verify-otp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, code }) });
     $('#loginBtn').disabled = false;
     if (r.ok) return load();
     $('#loginErr').textContent = r.data.error || 'Could not log in';
@@ -34,12 +58,12 @@ function viewLogin(msg) {
 async function load() {
   $('#root').innerHTML = `<p class="empty-state mono">Loading responses</p>`;
   const r = await api('/api/admin/responses');
-  if (r.status === 401) return viewLogin();
+  if (r.status === 401) return viewLoginEmail();
   if (!r.ok) { $('#root').innerHTML = `<p class="empty-state">${escH(r.data.error || 'Something went wrong')}. <button class="link" id="retry">Retry</button></p>`; $('#retry').onclick = load; return; }
   rows = r.data.responses || [];
   $('#navright').innerHTML = `<button id="refresh">Refresh</button><span style="opacity:.5">·</span><button id="logout">Log out</button>`;
   $('#refresh').onclick = load;
-  $('#logout').onclick = async () => { await api('/api/admin/logout', { method: 'POST' }); rows = []; closePanel(); viewLogin(); };
+  $('#logout').onclick = async () => { await api('/api/admin/logout', { method: 'POST' }); rows = []; closePanel(); viewLoginEmail(); };
   viewList();
 }
 

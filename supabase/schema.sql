@@ -1,6 +1,6 @@
 -- Vajra AI enablement audit: responses table.
--- Safe to run in an existing project: creates only objects prefixed "audit_", touches nothing else.
--- Re-runnable.
+-- Safe to run in an existing project: creates only objects prefixed "audit_" plus the
+-- vajra_admin_otp table below, touches nothing else. Re-runnable.
 
 create extension if not exists pgcrypto with schema extensions;
 
@@ -73,3 +73,18 @@ $$;
 
 revoke all on function public.audit_save(uuid,text,text,text,text,text,text,int,jsonb,jsonb,jsonb) from public, anon, authenticated;
 grant execute on function public.audit_save(uuid,text,text,text,text,text,text,int,jsonb,jsonb,jsonb) to service_role;
+
+-- Admin login: one-time email codes. One row per email; a new code overwrites the old one.
+-- Only the server (service role) can read or write; there is no RPC because only the
+-- server itself ever touches this table (never called with browser-supplied credentials).
+create table if not exists public.vajra_admin_otp (
+  email        text primary key,
+  code_hash    text not null,
+  attempts     int not null default 0,
+  created_at   timestamptz not null default now(),
+  expires_at   timestamptz not null
+);
+
+alter table public.vajra_admin_otp enable row level security;
+revoke all on public.vajra_admin_otp from anon, authenticated;
+grant select, insert, update, delete on public.vajra_admin_otp to service_role;
