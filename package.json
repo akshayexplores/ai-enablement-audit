@@ -1,0 +1,7 @@
+{
+  "name": "vajra-ai-enablement-audit",
+  "private": true,
+  "type": "module",
+  "description": "Vajra AI enablement audit: static front end + Vercel functions + Supabase",
+  "engines": { "node": ">=20" }
+}
