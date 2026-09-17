@@ -153,7 +153,7 @@ function vHome(){
     <button class="path" data-act="cxo"><span class="who">${ico("user",18)}CEO, COO, founder</span><h2>Executive snapshot</h2><p>The whole company at a glance.</p>
       <svg class="art" viewBox="0 0 112 96" aria-hidden="true"><g fill="none" stroke="var(--line)"><circle cx="56" cy="48" r="40"/><circle cx="56" cy="48" r="22"/><path d="M56 8v80M16 48h80M28 20l56 56M84 20L28 76"/></g><polygon points="56,10 82,22 92,48 78,70 56,80 36,68 26,48 32,24" fill="var(--pot-fill)" stroke="var(--pot)" stroke-width="2"/><polygon points="56,36 66,38 68,48 62,54 56,58 48,56 44,48 46,38" fill="var(--obs-fill)" stroke="var(--obs)" stroke-width="2"/></svg>
       <span class="go"><span>Start</span><span class="badge">3 min</span></span></button>
-    <button class="path b" data-act="setup"><span class="who">${ico("hr",18)}Department heads</span><h2>Department audit</h2><p>One team in depth, task by task.</p>
+    <button class="path" data-act="setup"><span class="who">${ico("hr",18)}Department heads</span><h2>Department audit</h2><p>One team in depth, task by task.</p>
       <svg class="art" viewBox="0 0 112 96" aria-hidden="true"><g fill="currentColor">${[0,1,2,3].map(r=>`<rect x="4" y="${10+r*21}" width="30" height="6" rx="3" opacity=".5"/>${[0,1,2,3].map(c=>`<rect x="${42+c*17}" y="${6+r*21}" width="13" height="13" rx="3" opacity="${c===[3,1,2,0][r]?1:.22}"/>`).join("")}`).join("")}</g></svg>
       <span class="go"><span>Set up</span><span class="badge">10 min per team</span></span></button>
   </div>${resume?`<div class="resumes">${resume}</div>`:""}
