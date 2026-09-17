@@ -17,6 +17,7 @@ A free audit that shows a company how much of its work AI could carry today, whe
 - Visitors enter **name, work email and company** before starting either path.
 - Answers **autosave** (debounced) and on tab close, so drop-offs are captured as `in_progress`.
 - Each response gets a random edit token in the visitor's browser. Updates without that token are rejected, so nobody can overwrite someone else's response.
+- On completion, people can **download a 2-page branded PDF report** (`report.js`) with a *Book a consultation* link to vajra.work/demo. Downloads are flagged as hot leads in `/admin` and the CSV.
 - The "See a finished sample" demo never saves.
 - A new database row is created when the email or company changes, so a shared computer doesn't overwrite a previous person.
 
@@ -31,7 +32,7 @@ A free audit that shows a company how much of its work AI could carry today, whe
 | `SUPABASE_SERVICE_ROLE_KEY` | Project settings → API keys → **New secret key** (name it `ai-enablement-audit`, so it can be revoked on its own). A legacy `service_role` key also works. Server-only, never exposed to the browser. |
 | `ADMIN_PASSWORD` | A long password (min 10 chars) for `/admin`. Changing it logs everyone out. |
 
-3. Deploy, open the site, take the audit with a test email, then check `/admin`.
+3. Deploy, open `/api/health` (every line should say `ok` or `secret key`), take the audit with a test email, then check `/admin`.
 
 ## Edit the content
 

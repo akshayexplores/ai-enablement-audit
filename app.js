@@ -1,7 +1,7 @@
 /* ---------- State ---------- */
 const KEY="vajra-audit-v1";
 const blank=()=>({head:"",tools:"",who:"",a:{},r:{},step:0});
-function fresh(){const s={view:"home",person:{name:"",email:""},company:"",rid:null,tok:null,ridKey:"",selected:[],sample:false,depts:{},cxo:{company:"",rid:null,tok:null,ridKey:"",step:0,size:{},lvl:{},org:{},done:false}};ORDER.forEach(k=>s.depts[k]=blank());return s;}
+function fresh(){const s={view:"home",person:{name:"",email:""},company:"",rid:null,tok:null,ridKey:"",reportAt:null,selected:[],sample:false,depts:{},cxo:{company:"",rid:null,tok:null,ridKey:"",reportAt:null,step:0,size:{},lvl:{},org:{},done:false}};ORDER.forEach(k=>s.depts[k]=blank());return s;}
 let state=fresh();
 try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&s.depts){const f=fresh();state=Object.assign(f,s);state.person=Object.assign(f.person,s.person||{});state.cxo=Object.assign(f.cxo,s.cxo||{});ORDER.forEach(k=>state.depts[k]=Object.assign(blank(),s.depts[k]||{}));}}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}sync();}
@@ -14,7 +14,9 @@ const uuid=()=>(crypto.randomUUID?crypto.randomUUID():"10000000-1000-4000-8000-1
 const tokenStr=()=>Array.from(crypto.getRandomValues(new Uint8Array(24)),b=>b.toString(16).padStart(2,"0")).join("");
 /* one database row per flow; a new row if the person or company changes */
 function claim(o,company){const key=(state.person.email.trim().toLowerCase()+"|"+String(company).trim().toLowerCase());
-  if(!o.rid||o.ridKey!==key){o.rid=uuid();o.tok=tokenStr();o.ridKey=key;}}
+  if(!o.rid||o.ridKey!==key){o.rid=uuid();o.tok=tokenStr();o.ridKey=key;o.reportAt=null;}}
+/* called by report.js after a PDF is generated: recorded in the summary so the admin page can flag it */
+function markReport(kind){const o=kind==="executive"?state.cxo:state;o.reportAt=new Date().toISOString();save();flush();}
 function detailsHtml(companyField,companyVal,enter){
   const n=state.person.name,e=state.person.email,showE=e&&!okEmail();
   return `<div class="fields"><label class="field"><span>Your name</span><input type="text" data-f="pname" data-enter="${enter}" value="${esc(n)}" placeholder="Full name" autocomplete="name" autofocus></label>
@@ -29,7 +31,7 @@ function execSummary(){
   ORDER.forEach(k=>{const sz=x.size[k];if(sz==null)return;const s=xscore(k),l=x.lvl[k];teams[DEPTS[k].name]={size:X_SIZE[sz][0],usage:l==null?null:X_LVL[l][0],hours:s&&!s.absent?Math.round(s.hours):0};});
   return {hours:Math.round(rows.reduce((s,r)=>s+r[1].hours,0)),possible:w(r=>r[1].pot),inUse:w(r=>r[1].obs),typical:w(r=>TYP[r[0]]),
     readiness:ov.length?Math.round(ov.reduce((s,v)=>s+v,0)/(ov.length*3)*100):null,
-    top:rows.sort((a,b)=>b[1].hours-a[1].hours).slice(0,3).map(r=>DEPTS[r[0]].name),teams};
+    top:rows.sort((a,b)=>b[1].hours-a[1].hours).slice(0,3).map(r=>DEPTS[r[0]].name),teams,reportDownloadedAt:x.reportAt||null};
 }
 function deptSummary(){
   const teams={},all=[];let hours=0,P=0,O=0,n=0;
@@ -39,7 +41,7 @@ function deptSummary(){
   all.sort((a,b)=>b.score-a.score);
   return {hours:Math.round(hours),possible:n?Math.round(P/n*100):null,inUse:n?Math.round(O/n*100):null,
     teamsDone:state.selected.filter(k=>{const p=progress(k);return p.done===p.total;}).length+" of "+state.selected.length,
-    top:all.slice(0,5).map(it=>({team:DEPTS[it.k].name,task:SHORT[it.k][it.i],tag:tagOf(it)[1],hours:it.hrs?Math.round(it.hrs):null})),teams};
+    top:all.slice(0,5).map(it=>({team:DEPTS[it.k].name,task:SHORT[it.k][it.i],tag:tagOf(it)[1],hours:it.hrs?Math.round(it.hrs):null})),teams,reportDownloadedAt:state.reportAt||null};
 }
 function payloads(){
   const out=[],p={name:state.person.name.trim(),email:state.person.email.trim().toLowerCase()},x=state.cxo;
@@ -185,10 +187,12 @@ function vCxoResult(){
   <p class="help" style="margin-top:.6rem">You use ${pct(obs)}. A typical company uses ${pct(typ)}. ${pct(pot)} is possible.</p>
   <section class="block"><h3>Where the hours are</h3><div class="hbars">${rows.map(([k,s])=>`<div class="hbar"><div class="n"><span>${ico(k,18)}<b>${DEPTS[k].name}</b>${s.unsure?`<span class="tag hitl">Blind spot</span>`:""}</span><span class="muted">${Math.round(s.hours)} hrs/wk</span></div><div class="trk"><i class="b" style="width:${s.hours/max*100}%"></i></div></div>`).join("")}</div></section>
   ${unsure.length?`<p class="help">Blind spot means you couldn't tell how the team uses AI. Usage there is likely individual and unmanaged.</p>`:""}
+  ${REPORT_BLOCK("executive")}
   <section class="block"><h3>Next: audit ${top.map(k=>DEPTS[k].name).join(", ")}</h3>
   <div class="row"><button class="btn" data-act="cxo-to-dept" data-top="${top.join(",")}">Set up department audit</button><button class="btn ghost" data-act="cxo-redo">Edit answers</button></div></section>${CTA}</div></div>`;
 }
 
+const REPORT_BLOCK=kind=>`<section class="block"><h3>Your report</h3><div class="resume" style="margin:0"><span>A 2-page PDF with your scores, where to start and guardrails, to share with your team.</span><button class="btn" data-act="report" data-kind="${kind}">Download report (PDF)</button></div></section>`;
 const CTA=`<section class="block"><div class="proof" style="padding:1.2rem 1.25rem;gap:.7rem"><div class="eyebrow" style="color:var(--tint)">Next step</div><p style="color:#F3F0E8">Vajra gives your whole team every top model in one governed workspace, with the guardrails to roll it out safely.</p><div class="row"><a class="btn" href="https://www.vajra.work/demo.html" target="_blank" rel="noopener">Book a demo</a></div></div></section>`;
 function vSetup(){
   const ok=okDetails(state.company)&&state.selected.length;
@@ -212,6 +216,7 @@ function vHub(){
     return `<button class="dcard" data-act="open" data-k="${k}">${ico(k,26)}<span><span class="nm">${DEPTS[k].name}</span><br><span class="st ${full?"done":""}">${full?"Done":p.done?`${p.done}/${p.total}`:"Not started"}</span></span>
     <span class="nums">${s?`<span class="p">${pct(s.pot)}</span> possible<br><span class="o">${pct(s.obs)}</span> in use`:`<span class="muted">Start</span>`}</span><span class="pb"><i style="width:${p.done/p.total*100}%"></i></span></button>`;}).join("")}</div>
   <p style="margin-top:.8rem"><button class="link" data-act="setup">Add or remove teams</button></p>
+  ${state.sample?"":complete===sel.length&&sel.length?REPORT_BLOCK("department"):`<section class="block"><h3>Your report</h3><p class="help">Finish every team (${complete}/${sel.length} done) to download your PDF report.</p></section>`}
   ${top.length?`<section class="block"><h3>Where to start</h3>${quad(top)}<div style="margin-top:.5rem">${oppList(top,true)}</div></section>`:""}
   <section class="block"><details><summary>Collect answers from others</summary><div><p class="help">Answers stay in this browser. Each person copies their code and sends it to you.</p><textarea id="out" readonly aria-label="Answers code">${code}</textarea><div class="row"><button class="btn ghost" data-act="copy">Copy my code</button><span class="msg" id="copymsg" role="status"></span></div>
     <textarea id="in" aria-label="Paste a code" placeholder="Paste a code you received"></textarea><div class="row"><button class="btn ghost" data-act="merge">Add their answers</button><span class="msg" id="mergemsg" role="status"></span></div></div></details>
@@ -290,6 +295,7 @@ function act(b){
   if(a==="ans"){const d=state.depts[state.view.slice(5)],i=+b.dataset.i,j=+b.dataset.j,kind=b.dataset.kind;
     if(kind==="r")d.r[i]=j;else{d.a[i]=d.a[i]||{};d.a[i][kind]=j;if(kind==="t"&&d.a[i].c==null)d.a[i].c=0;touch=i;}
     return render(true);}
+  if(a==="report"){if(b.disabled)return;if(b.dataset.kind==="department"&&state.sample)return;downloadReport(b.dataset.kind,b);return;}
   if(a==="sample"){wipe();state.company="Typical mid-size company";state.sample=true;state.selected=ORDER.slice();
     ORDER.forEach(k=>{const t=TYPICAL[k],d=state.depts[k];d.head=String(t.head);d.tools=t.tools;t.a.forEach((v,i)=>d.a[i]={t:v[0],c:v[1]});t.r.forEach((v,i)=>d.r[i]=v);d.step=2;});return go("hub");}
   if(a==="reset"){flush();wipe();return go("setup");}

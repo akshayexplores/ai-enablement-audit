@@ -5,6 +5,7 @@ const fmtDate = (d) => d ? new Date(d).toLocaleString('en-IN', { day: 'numeric',
 const KIND = { executive: 'Executive snapshot', department: 'Department audit' };
 let rows = [], filtered = [], selectedId = null;
 const f = { q: '', kind: '', status: '' };
+const dl = (x) => (x.summary || {}).reportDownloadedAt || null;
 
 async function api(path, opts) {
   const r = await fetch(path, { credentials: 'same-origin', ...opts });
@@ -44,7 +45,7 @@ async function load() {
 
 function applyFilters() {
   const q = f.q.trim().toLowerCase();
-  filtered = rows.filter((x) => (!f.kind || x.kind === f.kind) && (!f.status || x.status === f.status) &&
+  filtered = rows.filter((x) => (!f.kind || x.kind === f.kind) && (!f.status || (f.status === 'report' ? !!dl(x) : x.status === f.status)) &&
     (!q || [x.name, x.email, x.company].some((v) => String(v || '').toLowerCase().includes(q))));
 }
 
@@ -53,13 +54,14 @@ function viewList() {
   const done = rows.filter((x) => x.status === 'completed').length;
   const companies = new Set(rows.map((x) => String(x.company).trim().toLowerCase())).size;
   const wk = rows.filter((x) => Date.now() - new Date(x.created_at) < 7 * 864e5).length;
+  const reports = rows.filter(dl).length;
   $('#root').innerHTML = `<div class="top"><div><div class="eyebrow">AI enablement audit</div><h1>Responses</h1></div>
     <button class="btn ghost" id="csv" ${filtered.length ? '' : 'disabled'}>Export CSV (${filtered.length})</button></div>
     <div class="kpis"><div class="kpi"><b>${rows.length}</b><span>Responses</span></div><div class="kpi"><b>${done}</b><span>Completed</span></div>
-    <div class="kpi"><b>${rows.length - done}</b><span>In progress</span></div><div class="kpi"><b>${companies}</b><span>Companies · ${wk} this week</span></div></div>
+    <div class="kpi"><b>${reports}</b><span>Report downloads · hot leads</span></div><div class="kpi"><b>${companies}</b><span>Companies · ${wk} this week</span></div></div>
     <div class="filters"><input type="text" id="q" placeholder="Search name, email, company" value="${escH(f.q)}" aria-label="Search">
       <select id="kind" aria-label="Type"><option value="">All types</option><option value="executive">Executive</option><option value="department">Department</option></select>
-      <select id="status" aria-label="Status"><option value="">Any status</option><option value="completed">Completed</option><option value="in_progress">In progress</option></select></div>
+      <select id="status" aria-label="Status"><option value="">Any status</option><option value="completed">Completed</option><option value="in_progress">In progress</option><option value="report">Downloaded report</option></select></div>
     <div id="table"></div>`;
   $('#kind').value = f.kind; $('#status').value = f.status;
   $('#q').addEventListener('input', (e) => { f.q = e.target.value; renderTable(); });
@@ -80,7 +82,7 @@ function renderTable() {
       <td>${escH(x.name)}<span class="sm">${escH(x.email)}</span></td>
       <td>${escH(x.company)}</td>
       <td>${escH(KIND[x.kind] || x.kind)}</td>
-      <td><span class="pill ${x.status === 'completed' ? 'done' : ''}">${x.status === 'completed' ? 'Completed' : `${x.progress}%`}</span></td>
+      <td><span class="pill ${x.status === 'completed' ? 'done' : ''}">${x.status === 'completed' ? 'Completed' : `${x.progress}%`}</span>${dl(x) ? `<span class="pill hot" title="Downloaded the PDF report">Report ↓</span>` : ''}</td>
       <td class="num">${s.hours != null ? s.hours : '–'}</td>
       <td class="num">${s.possible != null ? s.possible + '%' : '–'} / ${s.inUse != null ? s.inUse + '%' : '–'}</td></tr>`; }).join('')}
     </tbody></table></div>`;
@@ -125,6 +127,7 @@ function openPanel(id) {
     <h2>${escH(x.company)}</h2>
     <dl class="kv"><dt>Name</dt><dd>${escH(x.name)}</dd><dt>Email</dt><dd><a href="mailto:${escH(x.email)}">${escH(x.email)}</a></dd>
       <dt>Status</dt><dd>${x.status === 'completed' ? 'Completed ' + escH(fmtDate(x.completed_at)) : `In progress · ${x.progress}%`}</dd>
+      ${dl(x) ? `<dt>Report</dt><dd><b>Downloaded</b> ${escH(fmtDate(dl(x)))} · hot lead</dd>` : ''}
       <dt>Started</dt><dd>${escH(fmtDate(x.created_at))}</dd><dt>Last activity</dt><dd>${escH(fmtDate(x.updated_at))}</dd>
       ${m.city || m.country ? `<dt>Location</dt><dd>${escH([m.city, m.country].filter(Boolean).join(', '))}</dd>` : ''}
       ${m.referrer ? `<dt>Came from</dt><dd>${escH(m.referrer)}</dd>` : ''}</dl>
@@ -139,14 +142,14 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePanel
 
 /* ---- CSV: one row per response, answers flattened into readable columns ---- */
 function exportCsv() {
-  const base = ['Started', 'Last activity', 'Completed at', 'Name', 'Email', 'Company', 'Type', 'Status', 'Progress %', 'Hours/wk in reach', 'Possible %', 'In use %', 'Readiness %', 'Top priorities', 'Country', 'City'];
+  const base = ['Started', 'Last activity', 'Completed at', 'Report downloaded at', 'Name', 'Email', 'Company', 'Type', 'Status', 'Progress %', 'Hours/wk in reach', 'Possible %', 'In use %', 'Readiness %', 'Top priorities', 'Country', 'City'];
   const teamCols = []; ORDER.forEach((k) => { const n = DEPTS[k].name; teamCols.push(`${n}: team size`, `${n}: AI use / answered`, `${n}: possible %`, `${n}: in use %`, `${n}: hrs/wk`); });
   const orgCols = X_ORG.map((q) => q[0]);
   const head = [...base, ...teamCols, ...orgCols, 'Raw answers (JSON)'];
   const lines = filtered.map((x) => {
     const s = x.summary || {}, m = x.meta || {}, a = x.answers || {};
     const top = (s.top || []).map((t) => typeof t === 'string' ? t : `${t.team}: ${t.task}`).join('; ');
-    const row = [x.created_at, x.updated_at, x.completed_at || '', x.name, x.email, x.company, KIND[x.kind] || x.kind, x.status, x.progress, s.hours, s.possible, s.inUse, s.readiness, top, m.country, m.city];
+    const row = [x.created_at, x.updated_at, x.completed_at || '', dl(x) || '', x.name, x.email, x.company, KIND[x.kind] || x.kind, x.status, x.progress, s.hours, s.possible, s.inUse, s.readiness, top, m.country, m.city];
     ORDER.forEach((k) => {
       const t = (s.teams || {})[DEPTS[k].name] || {};
       if (x.kind === 'executive') row.push(t.size || '', t.usage || '', '', '', t.hours != null ? t.hours : '');
