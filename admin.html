@@ -8,7 +8,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&family=Playfair+Display:wght@600&family=Fraunces:opsz,wght@9..144,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/styles.css">
 <style>
 .login{max-width:420px;margin:8vh auto 0;background:var(--surface);border:1px solid var(--edge);border-radius:var(--r);padding:2rem}
@@ -60,6 +60,10 @@ td .sm{display:block;color:var(--muted);font-size:.8rem;overflow-wrap:anywhere}
 <main class="wrap" id="root"></main>
 <aside class="panel" id="panel" aria-label="Response detail"></aside>
 <script src="/audit-data.js"></script>
+<script src="/audit-core.js"></script>
+<script>var state = null; /* report.js fills this in from a saved response */</script>
+<script src="/report.js"></script>
 <script src="/admin.js"></script>
+<script src="/admin-report.js"></script>
 </body>
 </html>

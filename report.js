@@ -55,7 +55,7 @@ async function rasteriseImages(root) {
   }
 }
 const rEsc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]));
-const fmtDateLong = () => new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+const fmtDateLong = () => new Date((typeof state !== "undefined" && state && state.__reportDate) || Date.now()).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
 
 const RCSS = `
 .rp{width:794px;height:1123px;background:#F3F0E8;color:#0B0B12;font:400 13.5px/1.55 Inter,Helvetica,Arial,sans-serif;position:relative;overflow:hidden;box-sizing:border-box}
@@ -185,7 +185,7 @@ function deptPages() {
   return [p1, p2];
 }
 
-async function downloadReport(kind, btn) {
+async function downloadReport(kind, btn, opts) {
   const label = btn ? btn.textContent : "";
   const setBtn = (t, dis) => { if (btn) { btn.textContent = t; btn.disabled = dis; } };
   setBtn("Preparing report", true);
@@ -218,7 +218,7 @@ async function downloadReport(kind, btn) {
     pdf.setProperties({ title: `Vajra AI enablement audit · ${kind === "executive" ? state.cxo.company : state.company}`, author: "Vajra", subject: "AI enablement audit report" });
     const company = (kind === "executive" ? state.cxo.company : state.company).trim().replace(/[^\w\- ]+/g, "").replace(/\s+/g, "-") || "Company";
     pdf.save(`Vajra-AI-Audit-${company}.pdf`);
-    markReport(kind);
+    if (!(opts && opts.track === false) && typeof markReport === "function") markReport(kind);
     setBtn("Downloaded ✓", false);
     setTimeout(() => setBtn(label, false), 2500);
   } catch (e) {
@@ -227,5 +227,36 @@ async function downloadReport(kind, btn) {
     setTimeout(() => setBtn(label, false), 4000);
   } finally {
     host.remove();
+  }
+}
+
+/* ---- Admin: rebuild a saved response into the same report the visitor downloaded ---- */
+const BLANK_DEPT = () => ({ head: "", tools: "", who: "", a: {}, r: {}, step: 0 });
+function stateFromResponse(resp) {
+  const a = resp.answers || {}, sum = resp.summary || {};
+  const st = {
+    person: { name: resp.name || "", email: resp.email || "" },
+    company: resp.company || "", selected: [], depts: {}, sample: false,
+    cxo: { company: resp.company || "", size: {}, lvl: {}, org: {}, step: 0, done: true, reportAt: sum.reportDownloadedAt || null },
+    reportAt: sum.reportDownloadedAt || null,
+    __reportDate: resp.completed_at || resp.updated_at || null,
+  };
+  ORDER.forEach((k) => { st.depts[k] = BLANK_DEPT(); });
+  if (resp.kind === "executive") {
+    st.cxo.size = a.size || {}; st.cxo.lvl = a.lvl || {}; st.cxo.org = a.org || {};
+  } else {
+    st.selected = (a.selected || []).filter((k) => DEPTS[k]);
+    st.selected.forEach((k) => { st.depts[k] = Object.assign(BLANK_DEPT(), (a.depts || {})[k] || {}); });
+  }
+  return st;
+}
+/* Swaps the saved answers in as the current state, builds the identical PDF, then puts the state back. */
+async function downloadReportFor(resp, btn) {
+  const prev = typeof state !== "undefined" ? state : null;
+  state = stateFromResponse(resp);
+  try {
+    await downloadReport(resp.kind, btn, { track: false });
+  } finally {
+    state = prev;
   }
 }
