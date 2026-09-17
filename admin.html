@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Audit Responses · Vajra</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<style>
+.login{max-width:420px;margin:8vh auto 0;background:var(--surface);border:1px solid var(--edge);border-radius:var(--r);padding:2rem}
+.login h1{font-size:2rem;margin:.9rem 0 1.2rem}
+.login .err{color:var(--red);font-size:.88rem;min-height:1.3rem;margin-top:.6rem}
+.top{display:flex;flex-wrap:wrap;gap:1rem;align-items:end;justify-content:space-between}
+.top h1{font-size:clamp(2rem,4vw,3rem);margin-top:.8rem}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--edge);border:1px solid var(--edge);margin-top:1.5rem}
+@media (max-width:700px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--surface);padding:1rem 1.1rem}
+.kpi b{display:block;font:500 1.7rem/1.1 var(--mono)}
+.kpi span{font:500 .64rem var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.filters{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin:1.5rem 0 .8rem}
+.filters input{max-width:320px}
+.filters select{font:500 .72rem var(--mono);letter-spacing:.1em;text-transform:uppercase;background:var(--paper);border:1px solid var(--input);border-radius:var(--r);padding:.7rem .7rem;color:var(--ink)}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--edge);background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:.9rem;min-width:760px}
+th{font:500 .62rem var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-align:left;padding:.7rem .8rem;border-bottom:1px solid var(--edge);white-space:nowrap}
+td{padding:.7rem .8rem;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--sunk)}
+tbody tr[aria-selected=true]{background:var(--ok-bg)}
+td .sm{display:block;color:var(--muted);font-size:.8rem;overflow-wrap:anywhere}
+.pill{font:500 .6rem var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:.18rem .45rem;border-radius:var(--r);white-space:nowrap;border:1px solid var(--ink)}
+.pill.done{background:var(--green);border-color:var(--green);color:var(--paper)}
+.num{font-family:var(--mono);white-space:nowrap}
+.panel{position:fixed;top:0;right:0;bottom:0;width:min(640px,100%);background:var(--paper);border-left:1px solid var(--edge);z-index:60;overflow-y:auto;padding:1.25rem 1.5rem 3rem;transform:translateX(100%);transition:transform .2s ease}
+.panel.open{transform:none}
+.panel .x{position:sticky;top:0;display:flex;justify-content:space-between;align-items:center;background:var(--paper);padding:.25rem 0 .75rem;border-bottom:1px solid var(--edge);margin-bottom:1rem}
+.panel h2{font-size:1.6rem;overflow-wrap:anywhere}
+.kv{display:grid;grid-template-columns:9rem 1fr;gap:.35rem 1rem;font-size:.9rem;margin-top:.8rem}
+.kv dt{font:500 .62rem var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding-top:.2rem}
+.kv dd{margin:0;overflow-wrap:anywhere}
+.sec{margin-top:1.6rem}
+.sec h3{margin-bottom:.5rem}
+.ans{width:100%;min-width:0;font-size:.86rem}
+.ans td,.ans th{padding:.45rem .5rem}
+.ans tbody tr{cursor:default}.ans tbody tr:hover{background:none}
+.empty-state{padding:3rem 1rem;text-align:center;color:var(--muted)}
+</style>
+</head>
+<body>
+<header class="nav"><div class="nav-in">
+  <a class="brand" href="/"><img src="/vajra-mark-dark.svg" alt="" width="28" height="28"><span class="wordmark">Vajra</span></a>
+  <span class="sep"></span><span class="prod">Audit responses</span><span style="flex:1"></span>
+  <span class="right" id="navright"></span>
+</div></header>
+<main class="wrap" id="root"></main>
+<aside class="panel" id="panel" aria-label="Response detail"></aside>
+<script src="/audit-data.js"></script>
+<script src="/admin.js"></script>
+</body>
+</html>
