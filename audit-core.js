@@ -1,6 +1,10 @@
 /* Vajra AI enablement audit: scoring, summaries and charts.
    Shared by the audit (app.js) and the admin page (admin.js + report.js) so both render identical numbers and charts.
-   Every function reads the global `state` that the page provides. */
+
+   Everything lives inside this function and is published on `window` ONLY if the page has not
+   defined it already, so app.js keeps its own copies and nothing can clash. Each function reads
+   the global `state` the page provides. */
+(function () {
 function execSummary(){
   const x=state.cxo,rows=ORDER.map(k=>[k,xscore(k)]).filter(r=>r[1]&&!r[1].absent);
   const heads=rows.reduce((s,r)=>s+r[1].head,0),w=f=>heads?Math.round(rows.reduce((s,r)=>s+f(r)*r[1].head,0)/heads*100):null;
@@ -64,3 +68,7 @@ const chart=(axes,label)=>axes.length>=3?radar(axes,label):hbars(axes);
 const homeAxes=()=>ORDER.map(k=>({label:DEPTS[k].name,pot:THEO[k],obs:TYP[k]}));
 function companyAxes(){return state.selected.map(k=>{const s=score(k);return {label:DEPTS[k].name,pot:s?s.pot:THEO[k],obs:s?s.obs:0,typ:TYP[k],hollow:!s,act:"open",k};});}
 function cxoAxes(cur){return ORDER.filter(k=>!(xscore(k)||{}).absent).map(k=>{const s=xscore(k);return {label:DEPTS[k].name,pot:THEO[k],obs:s?s.obs:0,typ:TYP[k],hollow:!s,bold:k===cur};});}
+
+  const EXPORTS = { execSummary, deptSummary, pct, esc, score, progress, xscore, tagOf, wrap, radar, hbars, chart, homeAxes, companyAxes, cxoAxes };
+  Object.keys(EXPORTS).forEach((k) => { if (typeof window[k] === "undefined") window[k] = EXPORTS[k]; });
+})();
