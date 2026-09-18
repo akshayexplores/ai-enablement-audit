@@ -6,16 +6,16 @@ export function mailConfigured() {
 }
 
 export async function sendOtpEmail(email, code) {
-  const from = process.env.RESEND_FROM_EMAIL || 'Vajra Admin <onboarding@resend.dev>';
+  const from = process.env.RESEND_FROM_EMAIL || 'CII Research Admin <onboarding@resend.dev>';
   const r = await fetch(RESEND_URL, {
     method: 'POST',
     headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       from,
       to: [email],
-      subject: `${code} is your Vajra admin code`,
-      text: `Your Vajra admin login code is ${code}. It expires in 10 minutes.\n\nIf you didn't request this, you can ignore this email.`,
-      html: `<p>Your Vajra admin login code is:</p><p style="font:600 28px monospace;letter-spacing:.08em">${code}</p><p>It expires in 10 minutes. If you didn't request this, ignore this email.</p>`,
+      subject: `${code} is your admin login code`,
+      text: `Your admin login code is ${code}. It expires in 10 minutes.\n\nIf you didn't request this, you can ignore this email.`,
+      html: `<p>Your admin login code is:</p><p style="font:600 28px monospace;letter-spacing:.08em">${code}</p><p>It expires in 10 minutes. If you didn't request this, ignore this email.</p>`,
     }),
   });
   if (!r.ok) {
