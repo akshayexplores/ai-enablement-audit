@@ -6,8 +6,8 @@ const LIBS = [
   "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js",
 ];
 const MARK_DARK = "/cii-mark.svg";
-const PAL = { pot: "#27247A", "pot-fill": "rgba(39,36,122,.16)", obs: "#0B0B12", "obs-fill": "rgba(11,11,18,.32)", line: "#E6E2D6",
-  ink: "#0B0B12", muted: "#4A4A55", surface: "#FBF9F4", "ok-bg": "rgba(39,36,122,.1)", ok: "#27247A" };
+const PAL = { pot: "#0F3D73", "pot-fill": "rgba(15,61,115,.14)", obs: "#5C86B8", "obs-fill": "rgba(92,134,184,.35)", line: "#DCE3EC",
+  ink: "#141A22", muted: "#5B6472", surface: "#F6F9FC", "ok-bg": "rgba(15,61,115,.08)", ok: "#0F3D73" };
 
 function loadScript(src) {
   return new Promise((res, rej) => {
@@ -24,7 +24,7 @@ async function loadLibs() {
 }
 /* Chart SVGs use CSS variables; resolve them and turn the SVG into an image so the renderer draws it exactly. */
 function svgImg(svg, width) {
-  const fixed = svg.replace(/var\(--([a-z-]+)\)/g, (m, n) => PAL[n] || "#0B0B12")
+  const fixed = svg.replace(/var\(--([a-z-]+)\)/g, (m, n) => PAL[n] || "#141A22")
     .replace("<svg ", '<svg xmlns="http://www.w3.org/2000/svg" ')
     .replace(/font-family:[^;"}]+/g, "font-family:Helvetica,Arial,sans-serif");
   return `<img alt="" data-svg="chart" style="width:${width}px;height:${Math.round(width * 460 / 560)}px;display:block" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(fixed)}">`;
@@ -57,57 +57,53 @@ const rEsc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (m) => ({ "&":
 const fmtDateLong = () => new Date((typeof state !== "undefined" && state && state.__reportDate) || Date.now()).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
 
 const RCSS = `
-.rp{width:794px;height:1123px;background:#F3F0E8;color:#0B0B12;font:400 13.5px/1.55 Inter,Helvetica,Arial,sans-serif;position:relative;overflow:hidden;box-sizing:border-box}
+.rp{width:794px;height:1123px;background:#FFFFFF;color:#141A22;font:400 13.5px/1.55 Inter,Helvetica,Arial,sans-serif;position:relative;overflow:hidden;box-sizing:border-box}
 .rp *{box-sizing:border-box}
-.rp .band{background:#27247A;color:#F3F0E8;padding:34px 48px 30px;position:relative;overflow:hidden}
+.rp .band{background:#0F3D73;color:#FFFFFF;padding:34px 48px 30px;position:relative;overflow:hidden}
 .rp .brand{display:flex;align-items:center;gap:10px}
-.rp .brand img{height:22px;width:auto;background:#F3F0E8;padding:3px 6px;border-radius:3px}
-.rp .wm{font:600 17px 'Playfair Display',Georgia,serif;letter-spacing:.16em;text-transform:uppercase}
-.rp .mono{font-family:'IBM Plex Mono','Courier New',monospace;text-transform:uppercase;letter-spacing:.16em;font-size:10px}
-.rp .eb{font-family:'IBM Plex Mono','Courier New',monospace;text-transform:uppercase;letter-spacing:.2em;font-size:10px;color:#27247A;display:flex;align-items:center;gap:10px}
+.rp .brand img{height:22px;width:auto;background:#FFFFFF;padding:3px 6px;border-radius:3px}
+.rp .wm{font:700 17px Inter,Helvetica,Arial,sans-serif;letter-spacing:.02em}
+.rp .mono{font-family:Inter,Helvetica,Arial,sans-serif;letter-spacing:.02em;font-size:10.5px}
+.rp .eb{font-family:Inter,Helvetica,Arial,sans-serif;font-weight:600;letter-spacing:.02em;font-size:10.5px;color:#0F3D73;display:flex;align-items:center;gap:10px}
 .rp .eb:after{content:"";flex:1;height:1px;background:currentColor;opacity:.3}
-.rp .band .eb{color:#F3F0E8}
-.rp h1{font:600 40px/1 'Playfair Display',Georgia,serif;text-transform:uppercase;letter-spacing:.01em;margin:18px 0 0;max-width:620px}
-.rp .for{margin-top:12px;color:#DCDBF2;font-size:13px}
+.rp .band .eb{color:#FFFFFF}
+.rp h1{font:700 34px/1.1 Inter,Helvetica,Arial,sans-serif;letter-spacing:0;margin:18px 0 0;max-width:620px}
+.rp .for{margin-top:12px;color:#D9E6F4;font-size:13px}
 .rp .body{padding:30px 48px}
 .rp .lead{font-size:15px;max-width:640px}
 .rp .lead b{font-weight:600}
-.rp .stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid #0B0B12;margin-top:20px;background:#FBF9F4}
-.rp .stat{padding:12px 14px;border-left:1px solid #E6E2D6}
+.rp .stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid #DCE3EC;margin-top:20px;background:#F6F9FC}
+.rp .stat{padding:12px 14px;border-left:1px solid #DCE3EC}
 .rp .stat:first-child{border-left:0}
-.rp .stat b{display:block;font:500 24px/1.1 'IBM Plex Mono','Courier New',monospace}
-.rp .stat span{font-family:'IBM Plex Mono','Courier New',monospace;text-transform:uppercase;letter-spacing:.12em;font-size:9px;color:#4A4A55}
+.rp .stat b{display:block;font:600 24px/1.1 Inter,Helvetica,Arial,sans-serif}
+.rp .stat span{font-family:Inter,Helvetica,Arial,sans-serif;letter-spacing:.02em;font-size:9.5px;color:#5B6472}
 .rp .grid{display:grid;grid-template-columns:330px 1fr;gap:26px;margin-top:22px;align-items:start}
-.rp .card{background:#FBF9F4;border:1px solid #0B0B12;padding:12px}
-.rp .leg{display:flex;gap:14px;margin-top:6px;font-family:'IBM Plex Mono','Courier New',monospace;text-transform:uppercase;letter-spacing:.1em;font-size:8.5px;color:#4A4A55}
+.rp .card{background:#F6F9FC;border:1px solid #DCE3EC;padding:12px}
+.rp .leg{display:flex;gap:14px;margin-top:6px;font-family:Inter,Helvetica,Arial,sans-serif;letter-spacing:.02em;font-size:9px;color:#5B6472}
 .rp .leg i{display:inline-block;width:9px;height:9px;margin-right:5px;vertical-align:-1px}
 .rp .rows{display:grid;gap:9px}
 .rp .rw .n{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:3px}
 .rp .rw .n b{font-weight:600}
-.rp .rw .n span{font-family:'IBM Plex Mono','Courier New',monospace;font-size:11px;color:#4A4A55}
-.rp .trk{height:7px;background:#E6E2D6;position:relative}
-.rp .trk i{position:absolute;left:0;top:0;bottom:0;background:rgba(39,36,122,.22);border-right:2px solid #27247A}
-.rp .trk i.o{background:#0B0B12;border:0}
-.rp .trk i.b{background:#27247A;border:0}
-.rp h3{font-family:'IBM Plex Mono','Courier New',monospace;text-transform:uppercase;letter-spacing:.2em;font-size:10.5px;font-weight:500;color:#27247A;margin:0 0 10px}
-.rp .opp{display:grid;grid-template-columns:26px 1fr;gap:2px 10px;padding:9px 0;border-top:1px solid #E6E2D6}
-.rp .opp .no{grid-row:span 2;width:22px;height:22px;border-radius:50%;background:#27247A;color:#F3F0E8;font:500 11px/22px 'IBM Plex Mono','Courier New',monospace;text-align:center}
+.rp .rw .n span{font-family:Inter,Helvetica,Arial,sans-serif;font-size:11px;color:#5B6472}
+.rp .trk{height:7px;background:#EAF0F7;position:relative}
+.rp .trk i{position:absolute;left:0;top:0;bottom:0;background:rgba(15,61,115,.2);border-right:2px solid #0F3D73}
+.rp .trk i.o{background:#5C86B8;border:0}
+.rp .trk i.b{background:#0F3D73;border:0}
+.rp h3{font-family:Inter,Helvetica,Arial,sans-serif;letter-spacing:.02em;font-size:11.5px;font-weight:600;color:#0F3D73;margin:0 0 10px}
+.rp .opp{display:grid;grid-template-columns:26px 1fr;gap:2px 10px;padding:9px 0;border-top:1px solid #DCE3EC}
+.rp .opp .no{grid-row:span 2;width:22px;height:22px;border-radius:50%;background:#0F3D73;color:#FFFFFF;font:600 11px/22px Inter,Helvetica,Arial,sans-serif;text-align:center}
 .rp .opp .t{font-weight:600;font-size:13px}
-.rp .opp .t small{font-family:'IBM Plex Mono','Courier New',monospace;text-transform:uppercase;letter-spacing:.08em;font-size:8.5px;font-weight:500;color:#4A4A55;margin-left:6px;padding:2px 5px;background:#E6E2D6}
-.rp .opp .h{color:#4A4A55;font-size:11.5px;line-height:1.45}
-.rp ul{margin:0;padding-left:16px;color:#4A4A55;font-size:12px;display:grid;gap:3px}
-.rp .note{font-size:10.5px;color:#4A4A55;line-height:1.5}
-.rp .foot{position:absolute;left:0;right:0;bottom:0;background:#0B0B12;color:#8a8a97;padding:14px 48px;display:flex;justify-content:space-between;align-items:center}
-.rp .foot .brand{color:#F3F0E8}
+.rp .opp .t small{font-family:Inter,Helvetica,Arial,sans-serif;letter-spacing:.02em;font-size:9px;font-weight:600;color:#5B6472;margin-left:6px;padding:2px 5px;background:#EAF0F7}
+.rp .opp .h{color:#5B6472;font-size:11.5px;line-height:1.45}
+.rp ul{margin:0;padding-left:16px;color:#5B6472;font-size:12px;display:grid;gap:3px}
+.rp .note{font-size:10.5px;color:#5B6472;line-height:1.5}
+.rp .foot{position:absolute;left:0;right:0;bottom:0;background:#0A2C54;color:#AEC4DC;padding:14px 48px;display:flex;justify-content:space-between;align-items:center}
+.rp .foot .brand{color:#FFFFFF}
 .rp .foot img{height:16px;width:auto}
-.rp .rays{position:absolute;right:-60px;top:-40px;width:460px;height:300px;opacity:.35}
 `;
-const RAYS = `<svg class="rays" viewBox="0 0 460 300" aria-hidden="true"><g stroke="#F3F0E8" stroke-width=".8" fill="none">${
-  [[460, -20], [470, 80], [470, 190], [440, 300], [300, -30], [180, -10], [120, 90], [190, 310]].map((q) => `<line x1="330" y1="130" x2="${q[0]}" y2="${q[1]}"/>`).join("")
-}<circle cx="330" cy="130" r="22"/><circle cx="330" cy="130" r="40" stroke-dasharray="2 5"/></g></svg>`;
 
 function header(company, sub) {
-  return `<div class="band">${RAYS}<div class="brand" style="position:relative"><img data-svg="mark" src="${MARK_DARK}" alt=""><span class="wm">CII</span></div>
+  return `<div class="band"><div class="brand" style="position:relative"><img data-svg="mark" src="${MARK_DARK}" alt=""><span class="wm">CII</span></div>
     <div class="eb" style="margin-top:26px;position:relative">AI enablement research · report</div>
     <h1 style="position:relative">${rEsc(company)}</h1>
     <div class="for" style="position:relative">${sub}</div></div>`;
@@ -117,7 +113,7 @@ function footer(n) {
     <span class="mono">In association with CII</span><span class="mono">Page ${n} of 2</span></div>`;
 }
 const GUARDRAILS = `<ul><li>A person approves payments, hiring decisions and contracts. Always.</li><li>AI writes to your systems only after someone approves, until error rates are measured.</li><li>Use official connectors with the narrowest access that does the job.</li><li>Personal data stays within your DPDP Act obligations.</li><li>Measure rework, not only speed.</li></ul>`;
-const LEGEND = (b, r) => `<div class="leg"><span><i style="background:#27247A;border-radius:50%"></i>${b}</span><span><i style="background:#0B0B12"></i>${r}</span><span><i style="height:0;border-top:2px dashed #0B0B12;width:14px"></i>Typical company</span></div>`;
+const LEGEND = (b, r) => `<div class="leg"><span><i style="background:#0F3D73;border-radius:50%"></i>${b}</span><span><i style="background:#5C86B8"></i>${r}</span><span><i style="height:0;border-top:2px dashed #5C86B8;width:14px"></i>Typical company</span></div>`;
 
 function execPages() {
   const x = state.cxo, s = execSummary();
@@ -128,7 +124,7 @@ function execPages() {
   const chartHtml = axes.length >= 3 ? svgImg(radar(axes, "Company AI coverage"), 304) : `<p class="note">Add at least three teams to see the chart.</p>`;
   const p1 = `<div class="rp">${header(x.company, sub)}<div class="body">
     <p class="lead">About <b>${Math.round((s.hours || 0) / 10) * 10} hours a week</b> of your teams' work is within reach of AI today. You use <b>${s.inUse ?? 0}%</b> of what's possible. A typical company uses ${s.typical ?? 0}%.</p>
-    <div class="stats"><div class="stat"><b style="color:#27247A">${s.possible ?? "–"}%</b><span>Possible</span></div><div class="stat"><b>${s.inUse ?? "–"}%</b><span>In use</span></div>
+    <div class="stats"><div class="stat"><b style="color:#0F3D73">${s.possible ?? "–"}%</b><span>Possible</span></div><div class="stat"><b>${s.inUse ?? "–"}%</b><span>In use</span></div>
       <div class="stat"><b>${s.typical ?? "–"}%</b><span>Typical company</span></div><div class="stat"><b>${s.readiness ?? "–"}%</b><span>Readiness</span></div></div>
     <div class="grid"><div class="card">${chartHtml}${LEGEND("Possible", "You")}</div>
       <div><h3>Where the hours are</h3><div class="rows">${rows.map(([k, r]) => `<div class="rw"><div class="n"><b>${DEPTS[k].name}${r.unsure ? " · blind spot" : ""}</b><span>${Math.round(r.hours)} hrs/wk</span></div><div class="trk"><i class="b" style="width:${(r.hours / max) * 100}%"></i></div></div>`).join("")}</div>
@@ -156,7 +152,7 @@ function deptPages() {
   const teamRows = sel.map((k) => { const sc = score(k); return sc ? `<div class="rw"><div class="n"><b>${DEPTS[k].name}</b><span>${Math.round(sc.obs * 100)}% of ${Math.round(sc.pot * 100)}%${sc.hours ? ` · ${Math.round(sc.hours)} hrs/wk` : ""}</span></div><div class="trk"><i style="width:${sc.pot * 100}%"></i><i class="o" style="width:${sc.obs * 100}%"></i></div></div>` : ""; }).join("");
   const p1 = `<div class="rp">${header(state.company, sub)}<div class="body">
     <p class="lead">Across the ${sel.length} team${sel.length > 1 ? "s" : ""} you audited, about <b>${Math.round((s.hours || 0) / 10) * 10} hours a week</b> are within reach of AI. Your teams use <b>${s.inUse ?? 0}%</b> of a possible <b>${s.possible ?? 0}%</b>.</p>
-    <div class="stats"><div class="stat"><b style="color:#27247A">${s.possible ?? "–"}%</b><span>Possible</span></div><div class="stat"><b>${s.inUse ?? "–"}%</b><span>In use</span></div>
+    <div class="stats"><div class="stat"><b style="color:#0F3D73">${s.possible ?? "–"}%</b><span>Possible</span></div><div class="stat"><b>${s.inUse ?? "–"}%</b><span>In use</span></div>
       <div class="stat"><b>${s.hours ?? "–"}</b><span>Hours a week</span></div><div class="stat"><b>${s.teamsDone}</b><span>Teams audited</span></div></div>
     <div class="grid" style="${chartHtml ? "" : "grid-template-columns:1fr"}">${chartHtml ? `<div class="card">${chartHtml}${LEGEND("Possible", "In use")}</div>` : ""}
       <div><h3>By team · in use of possible</h3><div class="rows">${teamRows}</div>
@@ -190,7 +186,7 @@ async function downloadReport(kind, btn, opts) {
     const pages = [...host.querySelectorAll(".rp")];
     for (let i = 0; i < pages.length; i++) {
       const pg = pages[i];
-      const canvas = await window.html2canvas(pg, { scale: 2, backgroundColor: "#F3F0E8", useCORS: true, logging: false, width: 794, height: 1123, windowWidth: 794 });
+      const canvas = await window.html2canvas(pg, { scale: 2, backgroundColor: "#FFFFFF", useCORS: true, logging: false, width: 794, height: 1123, windowWidth: 794 });
       if (i) pdf.addPage();
       pdf.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, 210, 297);
     }

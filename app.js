@@ -123,7 +123,7 @@ function quad(items){
   g+=`<text x="${W-r-8}" y="${t+18}" text-anchor="end" font-size="12" font-weight="600" fill="var(--ok)">Quick wins</text><text x="${l+8}" y="${t+18}" font-size="12" fill="var(--muted)">Big bets</text><text x="${W-r-8}" y="${H-b-8}" text-anchor="end" font-size="12" fill="var(--muted)">Easy extras</text><text x="${l+8}" y="${H-b-8}" font-size="12" fill="var(--muted)">Later</text>`;
   g+=`<text x="${(W+l-r)/2}" y="${H-8}" text-anchor="middle" font-size="11" fill="var(--muted)">Easier to automate →</text><text transform="translate(14 ${(H-b+t)/2}) rotate(-90)" text-anchor="middle" font-size="11" fill="var(--muted)">More hours →</text>`;
   items.forEach((it,n)=>{const ease=Math.min(1,Math.max(0,(.6*it.p+.4*(it.ready==null?.4:it.ready)-.3)/.65)),x=l+12+ease*(W-l-r-24),y=H-b-12-(it.score/max)*(H-t-b-24);
-    g+=`<circle cx="${x}" cy="${y}" r="11" fill="var(--pot)"/><text x="${x}" y="${y+4}" text-anchor="middle" font-size="11.5" font-weight="600" fill="#F3F0E8">${n+1}</text>`;});
+    g+=`<circle cx="${x}" cy="${y}" r="11" fill="var(--pot)"/><text x="${x}" y="${y+4}" text-anchor="middle" font-size="11.5" font-weight="600" fill="#fff">${n+1}</text>`;});
   return `<svg class="quad" viewBox="0 0 ${W} ${H}" role="img" aria-label="Opportunities by ease and hours"><style>text{font-family:Inter,system-ui,sans-serif}</style>${g}</svg>`;
 }
 const homeAxes=()=>ORDER.map(k=>({label:DEPTS[k].name,pot:THEO[k],obs:TYP[k]}));
@@ -191,7 +191,8 @@ function vCxoResult(){
   <div class="row"><button class="btn" data-act="cxo-to-dept" data-top="${top.join(",")}">Set up department audit</button><button class="btn ghost" data-act="cxo-redo">Edit answers</button></div></section></div></div>`;
 }
 
-const CLOSING_NOTE=`<section class="block"><h3>Your report</h3><p class="help">Thanks for completing the audit. Our team will email you a detailed report at the earliest possible.</p></section>`;
+const REPORT_ICON=`<svg class="ic" viewBox="0 0 24 24" width="22" height="22"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M4 7l8 6 8-6"/></svg>`;
+const CLOSING_NOTE=`<section class="block report-highlight">${REPORT_ICON}<div><h3>Your report</h3><p>We're compiling your results and preparing a detailed report — our team will email it to you shortly.</p></div></section>`;
 function vSetup(){
   const ok=okDetails(state.company)&&state.selected.length;
   return `<div class="narrow"><div class="eyebrow">Department audit · setup</div><h2 style="margin-top:.9rem">Set up the audit</h2>
@@ -214,7 +215,7 @@ function vHub(){
     return `<button class="dcard" data-act="open" data-k="${k}">${ico(k,26)}<span><span class="nm">${DEPTS[k].name}</span><br><span class="st ${full?"done":""}">${full?"Done":p.done?`${p.done}/${p.total}`:"Not started"}</span></span>
     <span class="nums">${s?`<span class="p">${pct(s.pot)}</span> possible<br><span class="o">${pct(s.obs)}</span> in use`:`<span class="muted">Start</span>`}</span><span class="pb"><i style="width:${p.done/p.total*100}%"></i></span></button>`;}).join("")}</div>
   <p style="margin-top:.8rem"><button class="link" data-act="setup">Add or remove teams</button></p>
-  ${state.sample?"":complete===sel.length&&sel.length?CLOSING_NOTE:`<section class="block"><h3>Your report</h3><p class="help">Finish every team (${complete}/${sel.length} done). Once complete, our team will email you a detailed report at the earliest possible.</p></section>`}
+  ${state.sample?"":complete===sel.length&&sel.length?CLOSING_NOTE:`<section class="block"><h3>Your report</h3><p class="help">Finish every team (${complete}/${sel.length} done) to unlock your report. Once complete, we'll compile your results and email you a detailed report shortly.</p></section>`}
   ${top.length?`<section class="block"><h3>Where to start</h3>${quad(top)}<div style="margin-top:.5rem">${oppList(top,true)}</div></section>`:""}
   <section class="block"><details><summary>Collect answers from others</summary><div><p class="help">Answers stay in this browser. Each person copies their code and sends it to you.</p><textarea id="out" readonly aria-label="Answers code">${code}</textarea><div class="row"><button class="btn ghost" data-act="copy">Copy my code</button><span class="msg" id="copymsg" role="status"></span></div>
     <textarea id="in" aria-label="Paste a code" placeholder="Paste a code you received"></textarea><div class="row"><button class="btn ghost" data-act="merge">Add their answers</button><span class="msg" id="mergemsg" role="status"></span></div></div></details>
