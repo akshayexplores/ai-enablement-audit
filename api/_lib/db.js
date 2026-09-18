@@ -32,7 +32,7 @@ export async function select(path) {
 }
 
 // Generic write (POST upsert / PATCH / DELETE) against a table, for server-only use.
-// `path` may include a query string, e.g. `vajra_admin_otp?on_conflict=email` or `vajra_admin_otp?email=eq.x`.
+// `path` may include a query string, e.g. `cii_admin_otp?on_conflict=email` or `cii_admin_otp?email=eq.x`.
 export async function write(path, method, body) {
   const prefer = method === 'POST' ? 'resolution=merge-duplicates,return=minimal' : 'return=minimal';
   const r = await fetch(`${URL_()}/rest/v1/${path}`, {
@@ -70,7 +70,7 @@ export function isAllowedEmail(email) {
 }
 
 /* ---- admin session: signed, expiring cookie carrying the logged-in email. No secrets stored in the browser. ---- */
-const COOKIE = 'vajra_audit_admin';
+const COOKIE = 'cii_audit_admin';
 const WEEK = 7 * 24 * 3600;
 
 function signingKey() {

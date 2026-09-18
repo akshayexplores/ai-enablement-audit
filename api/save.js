@@ -32,7 +32,7 @@ export default async function handler(req, res) {
     city: str(decodeURIComponent(req.headers['x-vercel-ip-city'] || ''), 80),
   };
 
-  const r = await rpc('audit_save', {
+  const r = await rpc('cii_audit_save', {
     p_id: b.id, p_token: b.token, p_kind: b.kind, p_status: b.status,
     p_name: name, p_email: email, p_company: company,
     p_progress: Math.max(0, Math.min(100, Math.round(Number(b.progress) || 0))),
@@ -42,6 +42,6 @@ export default async function handler(req, res) {
   if (r.ok) return res.status(200).json({ ok: true });
   const msg = JSON.stringify(r.data || '');
   if (msg.includes('forbidden')) return res.status(403).json({ error: 'Not allowed' });
-  console.error('audit_save failed', r.status, msg.slice(0, 500));
+  console.error('cii_audit_save failed', r.status, msg.slice(0, 500));
   return res.status(502).json({ error: 'Save failed' });
 }

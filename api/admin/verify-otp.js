@@ -20,7 +20,7 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'Wrong code' });
   }
 
-  const r = await select(`vajra_admin_otp?email=eq.${encodeURIComponent(email)}&select=code_hash,attempts,expires_at`);
+  const r = await select(`cii_admin_otp?email=eq.${encodeURIComponent(email)}&select=code_hash,attempts,expires_at`);
   const row = r.ok && Array.isArray(r.data) && r.data[0];
   if (!row || new Date(row.expires_at).getTime() < Date.now()) {
     return res.status(401).json({ error: 'Code expired, request a new one' });
@@ -34,11 +34,11 @@ export default async function handler(req, res) {
   const match = got.length === want.length && crypto.timingSafeEqual(got, want);
 
   if (!match) {
-    await write(`vajra_admin_otp?email=eq.${encodeURIComponent(email)}`, 'PATCH', { attempts: row.attempts + 1 });
+    await write(`cii_admin_otp?email=eq.${encodeURIComponent(email)}`, 'PATCH', { attempts: row.attempts + 1 });
     return res.status(401).json({ error: 'Wrong code' });
   }
 
-  await write(`vajra_admin_otp?email=eq.${encodeURIComponent(email)}`, 'DELETE');
+  await write(`cii_admin_otp?email=eq.${encodeURIComponent(email)}`, 'DELETE');
   res.setHeader('Set-Cookie', sessionCookie(email));
   return res.status(200).json({ ok: true });
 }

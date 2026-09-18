@@ -1,14 +1,13 @@
-/* Vajra AI enablement audit: one-click branded PDF report.
+/* CII AI enablement research: one-click branded PDF report (generated from the admin panel).
    Builds two A4 pages in a hidden container, renders them with html2canvas and packs them into a PDF with jsPDF.
    Libraries load from cdnjs only when someone clicks Download. Depends on globals from audit-data.js and app.js. */
-const CONSULT_URL = "https://www.vajra.work/demo.html";
 const LIBS = [
   "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js",
   "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js",
 ];
-const MARK_DARK = "/vajra-mark-dark.svg";
-const PAL = { pot: "#075E54", "pot-fill": "rgba(7,94,84,.16)", obs: "#0B0B12", "obs-fill": "rgba(11,11,18,.32)", line: "#E6E2D6",
-  ink: "#0B0B12", muted: "#4A4A55", surface: "#FBF9F4", "ok-bg": "rgba(7,94,84,.1)", ok: "#075E54" };
+const MARK_DARK = "/cii-mark.svg";
+const PAL = { pot: "#27247A", "pot-fill": "rgba(39,36,122,.16)", obs: "#0B0B12", "obs-fill": "rgba(11,11,18,.32)", line: "#E6E2D6",
+  ink: "#0B0B12", muted: "#4A4A55", surface: "#FBF9F4", "ok-bg": "rgba(39,36,122,.1)", ok: "#27247A" };
 
 function loadScript(src) {
   return new Promise((res, rej) => {
@@ -47,7 +46,7 @@ async function rasteriseImages(root) {
   for (const im of root.querySelectorAll("img[data-svg]")) {
     const kind = im.dataset.svg;
     if (kind === "mark") {
-      if (!mark) mark = await svgToPng(await (await fetch(MARK_DARK)).text(), 128, 128);
+      if (!mark) mark = await svgToPng(await (await fetch(MARK_DARK)).text(), 128, 84);
       im.src = mark;
     } else {
       im.src = await svgToPng(decodeURIComponent(im.getAttribute("src").split(",").slice(1).join(",")), 560, 460);
@@ -60,16 +59,16 @@ const fmtDateLong = () => new Date((typeof state !== "undefined" && state && sta
 const RCSS = `
 .rp{width:794px;height:1123px;background:#F3F0E8;color:#0B0B12;font:400 13.5px/1.55 Inter,Helvetica,Arial,sans-serif;position:relative;overflow:hidden;box-sizing:border-box}
 .rp *{box-sizing:border-box}
-.rp .band{background:#075E54;color:#F3F0E8;padding:34px 48px 30px;position:relative;overflow:hidden}
+.rp .band{background:#27247A;color:#F3F0E8;padding:34px 48px 30px;position:relative;overflow:hidden}
 .rp .brand{display:flex;align-items:center;gap:10px}
-.rp .brand img{width:26px;height:26px}
+.rp .brand img{height:22px;width:auto;background:#F3F0E8;padding:3px 6px;border-radius:3px}
 .rp .wm{font:600 17px 'Playfair Display',Georgia,serif;letter-spacing:.16em;text-transform:uppercase}
 .rp .mono{font-family:'IBM Plex Mono','Courier New',monospace;text-transform:uppercase;letter-spacing:.16em;font-size:10px}
-.rp .eb{font-family:'IBM Plex Mono','Courier New',monospace;text-transform:uppercase;letter-spacing:.2em;font-size:10px;color:#075E54;display:flex;align-items:center;gap:10px}
+.rp .eb{font-family:'IBM Plex Mono','Courier New',monospace;text-transform:uppercase;letter-spacing:.2em;font-size:10px;color:#27247A;display:flex;align-items:center;gap:10px}
 .rp .eb:after{content:"";flex:1;height:1px;background:currentColor;opacity:.3}
 .rp .band .eb{color:#F3F0E8}
 .rp h1{font:600 40px/1 'Playfair Display',Georgia,serif;text-transform:uppercase;letter-spacing:.01em;margin:18px 0 0;max-width:620px}
-.rp .for{margin-top:12px;color:#DCEAE6;font-size:13px}
+.rp .for{margin-top:12px;color:#DCDBF2;font-size:13px}
 .rp .body{padding:30px 48px}
 .rp .lead{font-size:15px;max-width:640px}
 .rp .lead b{font-weight:600}
@@ -87,25 +86,20 @@ const RCSS = `
 .rp .rw .n b{font-weight:600}
 .rp .rw .n span{font-family:'IBM Plex Mono','Courier New',monospace;font-size:11px;color:#4A4A55}
 .rp .trk{height:7px;background:#E6E2D6;position:relative}
-.rp .trk i{position:absolute;left:0;top:0;bottom:0;background:rgba(7,94,84,.22);border-right:2px solid #075E54}
+.rp .trk i{position:absolute;left:0;top:0;bottom:0;background:rgba(39,36,122,.22);border-right:2px solid #27247A}
 .rp .trk i.o{background:#0B0B12;border:0}
-.rp .trk i.b{background:#075E54;border:0}
-.rp h3{font-family:'IBM Plex Mono','Courier New',monospace;text-transform:uppercase;letter-spacing:.2em;font-size:10.5px;font-weight:500;color:#075E54;margin:0 0 10px}
+.rp .trk i.b{background:#27247A;border:0}
+.rp h3{font-family:'IBM Plex Mono','Courier New',monospace;text-transform:uppercase;letter-spacing:.2em;font-size:10.5px;font-weight:500;color:#27247A;margin:0 0 10px}
 .rp .opp{display:grid;grid-template-columns:26px 1fr;gap:2px 10px;padding:9px 0;border-top:1px solid #E6E2D6}
-.rp .opp .no{grid-row:span 2;width:22px;height:22px;border-radius:50%;background:#075E54;color:#F3F0E8;font:500 11px/22px 'IBM Plex Mono','Courier New',monospace;text-align:center}
+.rp .opp .no{grid-row:span 2;width:22px;height:22px;border-radius:50%;background:#27247A;color:#F3F0E8;font:500 11px/22px 'IBM Plex Mono','Courier New',monospace;text-align:center}
 .rp .opp .t{font-weight:600;font-size:13px}
 .rp .opp .t small{font-family:'IBM Plex Mono','Courier New',monospace;text-transform:uppercase;letter-spacing:.08em;font-size:8.5px;font-weight:500;color:#4A4A55;margin-left:6px;padding:2px 5px;background:#E6E2D6}
 .rp .opp .h{color:#4A4A55;font-size:11.5px;line-height:1.45}
 .rp ul{margin:0;padding-left:16px;color:#4A4A55;font-size:12px;display:grid;gap:3px}
-.rp .cta{background:#075E54;color:#F3F0E8;padding:26px 28px;position:relative;overflow:hidden;margin-top:20px}
-.rp .cta h2{font:600 26px/1.05 'Playfair Display',Georgia,serif;text-transform:uppercase;margin:12px 0 10px;max-width:520px}
-.rp .cta p{color:#E7F0ED;font-size:13px;max-width:560px}
-.rp .cta .btn{display:inline-block;margin-top:16px;background:#F3F0E8;color:#075E54;font:500 11px 'IBM Plex Mono','Courier New',monospace;letter-spacing:.14em;text-transform:uppercase;padding:12px 20px;border:1px solid #F3F0E8}
-.rp .cta .url{font-family:'IBM Plex Mono','Courier New',monospace;font-size:10px;letter-spacing:.06em;color:#CFE3DE;margin-left:14px}
 .rp .note{font-size:10.5px;color:#4A4A55;line-height:1.5}
 .rp .foot{position:absolute;left:0;right:0;bottom:0;background:#0B0B12;color:#8a8a97;padding:14px 48px;display:flex;justify-content:space-between;align-items:center}
 .rp .foot .brand{color:#F3F0E8}
-.rp .foot img{width:16px;height:16px}
+.rp .foot img{height:16px;width:auto}
 .rp .rays{position:absolute;right:-60px;top:-40px;width:460px;height:300px;opacity:.35}
 `;
 const RAYS = `<svg class="rays" viewBox="0 0 460 300" aria-hidden="true"><g stroke="#F3F0E8" stroke-width=".8" fill="none">${
@@ -113,23 +107,17 @@ const RAYS = `<svg class="rays" viewBox="0 0 460 300" aria-hidden="true"><g stro
 }<circle cx="330" cy="130" r="22"/><circle cx="330" cy="130" r="40" stroke-dasharray="2 5"/></g></svg>`;
 
 function header(company, sub) {
-  return `<div class="band">${RAYS}<div class="brand" style="position:relative"><img data-svg="mark" src="${MARK_DARK}" alt=""><span class="wm">Vajra</span></div>
-    <div class="eb" style="margin-top:26px;position:relative">AI enablement audit · report</div>
+  return `<div class="band">${RAYS}<div class="brand" style="position:relative"><img data-svg="mark" src="${MARK_DARK}" alt=""><span class="wm">CII</span></div>
+    <div class="eb" style="margin-top:26px;position:relative">AI enablement research · report</div>
     <h1 style="position:relative">${rEsc(company)}</h1>
     <div class="for" style="position:relative">${sub}</div></div>`;
 }
 function footer(n) {
-  return `<div class="foot"><span class="brand" style="display:flex;gap:8px;align-items:center"><img data-svg="mark" src="${MARK_DARK}" alt=""><span class="mono">Vajra</span></span>
-    <span class="mono">vajra.work</span><span class="mono">Page ${n} of 2</span></div>`;
-}
-function ctaBlock() {
-  return `<div class="cta" id="rp-cta">${RAYS}<div class="eb" style="color:#F3F0E8;position:relative">Next step</div>
-    <h2 style="position:relative">Book a consultation with the Vajra team</h2>
-    <p style="position:relative">Walk through these results with us. We'll help you pick the first workflows to put AI on, and show how to give every team every top model in one governed workspace, with the guardrails to roll it out safely.</p>
-    <div style="position:relative"><span class="btn" id="rp-cta-btn">Book a consultation</span><span class="url">${CONSULT_URL.replace("https://", "")}</span></div></div>`;
+  return `<div class="foot"><span class="brand" style="display:flex;gap:8px;align-items:center"><img data-svg="mark" src="${MARK_DARK}" alt=""><span class="mono">CII</span></span>
+    <span class="mono">In association with CII</span><span class="mono">Page ${n} of 2</span></div>`;
 }
 const GUARDRAILS = `<ul><li>A person approves payments, hiring decisions and contracts. Always.</li><li>AI writes to your systems only after someone approves, until error rates are measured.</li><li>Use official connectors with the narrowest access that does the job.</li><li>Personal data stays within your DPDP Act obligations.</li><li>Measure rework, not only speed.</li></ul>`;
-const LEGEND = (b, r) => `<div class="leg"><span><i style="background:#075E54;border-radius:50%"></i>${b}</span><span><i style="background:#0B0B12"></i>${r}</span><span><i style="height:0;border-top:2px dashed #0B0B12;width:14px"></i>Typical company</span></div>`;
+const LEGEND = (b, r) => `<div class="leg"><span><i style="background:#27247A;border-radius:50%"></i>${b}</span><span><i style="background:#0B0B12"></i>${r}</span><span><i style="height:0;border-top:2px dashed #0B0B12;width:14px"></i>Typical company</span></div>`;
 
 function execPages() {
   const x = state.cxo, s = execSummary();
@@ -140,7 +128,7 @@ function execPages() {
   const chartHtml = axes.length >= 3 ? svgImg(radar(axes, "Company AI coverage"), 304) : `<p class="note">Add at least three teams to see the chart.</p>`;
   const p1 = `<div class="rp">${header(x.company, sub)}<div class="body">
     <p class="lead">About <b>${Math.round((s.hours || 0) / 10) * 10} hours a week</b> of your teams' work is within reach of AI today. You use <b>${s.inUse ?? 0}%</b> of what's possible. A typical company uses ${s.typical ?? 0}%.</p>
-    <div class="stats"><div class="stat"><b style="color:#075E54">${s.possible ?? "–"}%</b><span>Possible</span></div><div class="stat"><b>${s.inUse ?? "–"}%</b><span>In use</span></div>
+    <div class="stats"><div class="stat"><b style="color:#27247A">${s.possible ?? "–"}%</b><span>Possible</span></div><div class="stat"><b>${s.inUse ?? "–"}%</b><span>In use</span></div>
       <div class="stat"><b>${s.typical ?? "–"}%</b><span>Typical company</span></div><div class="stat"><b>${s.readiness ?? "–"}%</b><span>Readiness</span></div></div>
     <div class="grid"><div class="card">${chartHtml}${LEGEND("Possible", "You")}</div>
       <div><h3>Where the hours are</h3><div class="rows">${rows.map(([k, r]) => `<div class="rw"><div class="n"><b>${DEPTS[k].name}${r.unsure ? " · blind spot" : ""}</b><span>${Math.round(r.hours)} hrs/wk</span></div><div class="trk"><i class="b" style="width:${(r.hours / max) * 100}%"></i></div></div>`).join("")}</div>
@@ -153,7 +141,6 @@ function execPages() {
       return `<div class="opp"><div class="no">${i + 1}</div><div class="t">${rEsc(t)}<small>${Math.round(r.hours || 0)} hrs/wk in reach</small></div><div class="h">${rEsc(PROOF[k] || "")}. Connects today: ${rEsc(CONNECT[k] || "")}. Recommended next: a task-by-task department audit.</div></div>`; }).join("") || `<p class="note">Answer more teams to see priorities.</p>`}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:22px"><div><h3>Guardrails</h3>${GUARDRAILS}</div>
       <div><h3>How to read this</h3><p class="note">"Possible" is how much of each team's work AI can carry today with a person reviewing, based on published occupational benchmarks (Anthropic, Labour Market Impacts of AI, 2026; McKinsey; JetBrains) and blended estimates. "In use" scales that by how teams use AI today. Hours a week = team size × 40 × the gap × 0.5, assuming half the gap is realistically captured.</p></div></div>
-    ${ctaBlock()}
     </div>${footer(2)}</div>`;
   return [p1, p2];
 }
@@ -169,7 +156,7 @@ function deptPages() {
   const teamRows = sel.map((k) => { const sc = score(k); return sc ? `<div class="rw"><div class="n"><b>${DEPTS[k].name}</b><span>${Math.round(sc.obs * 100)}% of ${Math.round(sc.pot * 100)}%${sc.hours ? ` · ${Math.round(sc.hours)} hrs/wk` : ""}</span></div><div class="trk"><i style="width:${sc.pot * 100}%"></i><i class="o" style="width:${sc.obs * 100}%"></i></div></div>` : ""; }).join("");
   const p1 = `<div class="rp">${header(state.company, sub)}<div class="body">
     <p class="lead">Across the ${sel.length} team${sel.length > 1 ? "s" : ""} you audited, about <b>${Math.round((s.hours || 0) / 10) * 10} hours a week</b> are within reach of AI. Your teams use <b>${s.inUse ?? 0}%</b> of a possible <b>${s.possible ?? 0}%</b>.</p>
-    <div class="stats"><div class="stat"><b style="color:#075E54">${s.possible ?? "–"}%</b><span>Possible</span></div><div class="stat"><b>${s.inUse ?? "–"}%</b><span>In use</span></div>
+    <div class="stats"><div class="stat"><b style="color:#27247A">${s.possible ?? "–"}%</b><span>Possible</span></div><div class="stat"><b>${s.inUse ?? "–"}%</b><span>In use</span></div>
       <div class="stat"><b>${s.hours ?? "–"}</b><span>Hours a week</span></div><div class="stat"><b>${s.teamsDone}</b><span>Teams audited</span></div></div>
     <div class="grid" style="${chartHtml ? "" : "grid-template-columns:1fr"}">${chartHtml ? `<div class="card">${chartHtml}${LEGEND("Possible", "In use")}</div>` : ""}
       <div><h3>By team · in use of possible</h3><div class="rows">${teamRows}</div>
@@ -180,7 +167,6 @@ function deptPages() {
     ${top.map((it, i) => `<div class="opp"><div class="no">${i + 1}</div><div class="t">${DEPTS[it.k].name} · ${rEsc(it.name)}<small>${rEsc(tagOf(it)[1])}</small>${it.hrs ? `<small>${Math.round(it.hrs)} hrs/wk</small>` : ""}</div><div class="h">${rEsc(it.how)}</div></div>`).join("") || `<p class="note">Answer the Work tab for each team to see priorities.</p>`}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:18px"><div><h3>Guardrails</h3>${GUARDRAILS}</div>
       <div><h3>How to read this</h3><p class="note">Each task has a benchmark for how much of it AI can carry today with a person reviewing. "Possible" is the average weighted by where the team spends time; "In use" scales each task by how it gets done today. Quick win: a task AI can largely carry, in a team that scored 50% or more on setup.</p></div></div>
-    ${ctaBlock()}
     </div>${footer(2)}</div>`;
   return [p1, p2];
 }
@@ -207,17 +193,10 @@ async function downloadReport(kind, btn, opts) {
       const canvas = await window.html2canvas(pg, { scale: 2, backgroundColor: "#F3F0E8", useCORS: true, logging: false, width: 794, height: 1123, windowWidth: 794 });
       if (i) pdf.addPage();
       pdf.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, 210, 297);
-      const cta = pg.querySelector("#rp-cta-btn");
-      if (cta) {
-        const pr = pg.getBoundingClientRect(), r = cta.getBoundingClientRect(), k = 210 / 794;
-        pdf.link((r.left - pr.left) * k, (r.top - pr.top) * k, r.width * k, r.height * k, { url: CONSULT_URL });
-        const box = pg.querySelector("#rp-cta").getBoundingClientRect();
-        pdf.link((box.left - pr.left) * k, (box.top - pr.top) * k, box.width * k, box.height * k, { url: CONSULT_URL });
-      }
     }
-    pdf.setProperties({ title: `Vajra AI enablement audit · ${kind === "executive" ? state.cxo.company : state.company}`, author: "Vajra", subject: "AI enablement audit report" });
+    pdf.setProperties({ title: `CII AI enablement research · ${kind === "executive" ? state.cxo.company : state.company}`, author: "CII", subject: "AI enablement research report" });
     const company = (kind === "executive" ? state.cxo.company : state.company).trim().replace(/[^\w\- ]+/g, "").replace(/\s+/g, "-") || "Company";
-    pdf.save(`Vajra-AI-Audit-${company}.pdf`);
+    pdf.save(`CII-AI-Audit-${company}.pdf`);
     if (!(opts && opts.track === false) && typeof markReport === "function") markReport(kind);
     setBtn("Downloaded ✓", false);
     setTimeout(() => setBtn(label, false), 2500);
@@ -230,7 +209,7 @@ async function downloadReport(kind, btn, opts) {
   }
 }
 
-/* ---- Admin: rebuild a saved response into the same report the visitor downloaded ---- */
+/* ---- Admin: rebuild a saved response into the same report the visitor would have gotten ---- */
 const BLANK_DEPT = () => ({ head: "", tools: "", who: "", a: {}, r: {}, step: 0 });
 function stateFromResponse(resp) {
   const a = resp.answers || {}, sum = resp.summary || {};

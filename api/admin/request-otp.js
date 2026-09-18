@@ -26,7 +26,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true });
   }
 
-  const existing = await select(`vajra_admin_otp?email=eq.${encodeURIComponent(email)}&select=created_at`);
+  const existing = await select(`cii_admin_otp?email=eq.${encodeURIComponent(email)}&select=created_at`);
   const last = existing.ok && Array.isArray(existing.data) && existing.data[0];
   if (last && Date.now() - new Date(last.created_at).getTime() < MIN_GAP_MS) {
     return res.status(429).json({ error: 'Wait a bit before requesting another code' });
@@ -36,7 +36,7 @@ export default async function handler(req, res) {
   const codeHash = crypto.createHash('sha256').update(code).digest('hex');
   const expiresAt = new Date(Date.now() + CODE_TTL_MS).toISOString();
 
-  const w = await write('vajra_admin_otp?on_conflict=email', 'POST', {
+  const w = await write('cii_admin_otp?on_conflict=email', 'POST', {
     email, code_hash: codeHash, attempts: 0, created_at: new Date().toISOString(), expires_at: expiresAt,
   });
   if (!w.ok) {

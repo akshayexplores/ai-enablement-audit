@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   };
   if (url && key) {
     try {
-      const r = await select('audit_responses?select=id&limit=1');
+      const r = await select('cii_audit_responses?select=id&limit=1');
       out.database = r.ok ? 'ok' : `error ${r.status}`;
     } catch (e) {
       out.database = 'unreachable';
