@@ -1,5 +1,5 @@
 /* ---------- State ---------- */
-const KEY="vajra-audit-v1";
+const KEY="cii-audit-v1";
 const blank=()=>({head:"",tools:"",who:"",a:{},r:{},step:0});
 function fresh(){const s={view:"home",person:{name:"",email:""},company:"",rid:null,tok:null,ridKey:"",reportAt:null,selected:[],sample:false,depts:{},cxo:{company:"",rid:null,tok:null,ridKey:"",reportAt:null,step:0,size:{},lvl:{},org:{},done:false}};ORDER.forEach(k=>s.depts[k]=blank());return s;}
 let state=fresh();
@@ -22,7 +22,7 @@ function detailsHtml(companyField,companyVal,enter){
   return `<div class="fields"><label class="field"><span>Your name</span><input type="text" data-f="pname" data-enter="${enter}" value="${esc(n)}" placeholder="Full name" autocomplete="name" autofocus></label>
   <label class="field"><span>Work email</span><input type="email" data-f="pemail" data-enter="${enter}" class="${showE?"bad":""}" value="${esc(e)}" placeholder="you@company.com" autocomplete="email"><span class="err" id="emailerr">${showE?"Check this email address":""}</span></label>
   <label class="field full"><span>Company</span><input class="big" type="text" data-f="${companyField}" data-enter="${enter}" value="${esc(companyVal)}" placeholder="Company name" autocomplete="organization"></label></div>
-  <p class="privacy">We save your answers as you go so you can pick up where you left off. Vajra uses your name, email and answers to prepare your results and may contact you about them. We don't sell your data.</p>`;
+  <p class="privacy">We save your answers as you go so you can pick up where you left off. This research study, prepared in association with CII, uses your name, email and answers to prepare your results and may contact you about them. We don't sell your data.</p>`;
 }
 function execSummary(){
   const x=state.cxo,rows=ORDER.map(k=>[k,xscore(k)]).filter(r=>r[1]&&!r[1].absent);
@@ -146,7 +146,7 @@ function vHome(){
   if(state.cxo.done||state.cxo.step>0)resume+=`<div class="resume"><span>Executive snapshot${state.cxo.company?": "+esc(state.cxo.company):""}</span><button class="btn ghost" data-act="${state.cxo.done?"cxo-result":"cxo"}">${state.cxo.done?"Results":"Continue"}</button></div>`;
   const theo=ORDER.reduce((s,k)=>s+THEO[k],0)/8,typ=ORDER.reduce((s,k)=>s+TYP[k],0)/8;
   const rays=`<svg class="rays" viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g stroke="#F3F0E8" stroke-width=".7" fill="none" opacity=".6">${[[1420,-60],[1480,60],[1540,200],[1540,340],[1500,500],[1440,640],[1360,720],[620,-120],[440,-40],[300,120],[520,700],[720,740]].map(q=>`<line x1="880" y1="300" x2="${q[0]}" y2="${q[1]}"/>`).join("")}<circle cx="880" cy="300" r="26"/><circle cx="880" cy="300" r="46" stroke-dasharray="2 5"/></g></svg>`;
-  return `<div class="hero">${rays}<div><div class="eyebrow">AI enablement audit · by Vajra</div><h1>How much of your work could AI do?</h1>
+  return `<div class="hero">${rays}<div><div class="eyebrow">AI enablement audit · a CII research study</div><h1>How much of your work could AI do?</h1>
     <div class="lede"><span><b style="color:var(--pot)">${pct(theo)}</b>of desk work is within reach of AI today</span><span><b style="color:var(--obs)">${pct(typ)}</b>is what a typical company uses</span></div></div>
     <div>${radar(homeAxes(),"AI potential versus typical adoption by department")}</div></div>
   <div class="paths">
@@ -186,13 +186,12 @@ function vCxoResult(){
   <p class="help" style="margin-top:.6rem">You use ${pct(obs)}. A typical company uses ${pct(typ)}. ${pct(pot)} is possible.</p>
   <section class="block"><h3>Where the hours are</h3><div class="hbars">${rows.map(([k,s])=>`<div class="hbar"><div class="n"><span>${ico(k,18)}<b>${DEPTS[k].name}</b>${s.unsure?`<span class="tag hitl">Blind spot</span>`:""}</span><span class="muted">${Math.round(s.hours)} hrs/wk</span></div><div class="trk"><i class="b" style="width:${s.hours/max*100}%"></i></div></div>`).join("")}</div></section>
   ${unsure.length?`<p class="help">Blind spot means you couldn't tell how the team uses AI. Usage there is likely individual and unmanaged.</p>`:""}
-  ${REPORT_BLOCK("executive")}
+  ${CLOSING_NOTE}
   <section class="block"><h3>Next: audit ${top.map(k=>DEPTS[k].name).join(", ")}</h3>
-  <div class="row"><button class="btn" data-act="cxo-to-dept" data-top="${top.join(",")}">Set up department audit</button><button class="btn ghost" data-act="cxo-redo">Edit answers</button></div></section>${CTA}</div></div>`;
+  <div class="row"><button class="btn" data-act="cxo-to-dept" data-top="${top.join(",")}">Set up department audit</button><button class="btn ghost" data-act="cxo-redo">Edit answers</button></div></section></div></div>`;
 }
 
-const REPORT_BLOCK=kind=>`<section class="block"><h3>Your report</h3><div class="resume" style="margin:0"><span>A 2-page PDF with your scores, where to start and guardrails, to share with your team.</span><button class="btn" data-act="report" data-kind="${kind}">Download report (PDF)</button></div></section>`;
-const CTA=`<section class="block"><div class="proof" style="padding:1.2rem 1.25rem;gap:.7rem"><div class="eyebrow" style="color:var(--tint)">Next step</div><p style="color:#F3F0E8">Vajra gives your whole team every top model in one governed workspace, with the guardrails to roll it out safely.</p><div class="row"><a class="btn" href="https://www.vajra.work/demo.html" target="_blank" rel="noopener">Book a demo</a></div></div></section>`;
+const CLOSING_NOTE=`<section class="block"><h3>Your report</h3><p class="help">Thanks for completing the audit. Our team will email you a detailed report at the earliest possible.</p></section>`;
 function vSetup(){
   const ok=okDetails(state.company)&&state.selected.length;
   return `<div class="narrow"><div class="eyebrow">Department audit · setup</div><h2 style="margin-top:.9rem">Set up the audit</h2>
@@ -215,13 +214,13 @@ function vHub(){
     return `<button class="dcard" data-act="open" data-k="${k}">${ico(k,26)}<span><span class="nm">${DEPTS[k].name}</span><br><span class="st ${full?"done":""}">${full?"Done":p.done?`${p.done}/${p.total}`:"Not started"}</span></span>
     <span class="nums">${s?`<span class="p">${pct(s.pot)}</span> possible<br><span class="o">${pct(s.obs)}</span> in use`:`<span class="muted">Start</span>`}</span><span class="pb"><i style="width:${p.done/p.total*100}%"></i></span></button>`;}).join("")}</div>
   <p style="margin-top:.8rem"><button class="link" data-act="setup">Add or remove teams</button></p>
-  ${state.sample?"":complete===sel.length&&sel.length?REPORT_BLOCK("department"):`<section class="block"><h3>Your report</h3><p class="help">Finish every team (${complete}/${sel.length} done) to download your PDF report.</p></section>`}
+  ${state.sample?"":complete===sel.length&&sel.length?CLOSING_NOTE:`<section class="block"><h3>Your report</h3><p class="help">Finish every team (${complete}/${sel.length} done). Once complete, our team will email you a detailed report at the earliest possible.</p></section>`}
   ${top.length?`<section class="block"><h3>Where to start</h3>${quad(top)}<div style="margin-top:.5rem">${oppList(top,true)}</div></section>`:""}
   <section class="block"><details><summary>Collect answers from others</summary><div><p class="help">Answers stay in this browser. Each person copies their code and sends it to you.</p><textarea id="out" readonly aria-label="Answers code">${code}</textarea><div class="row"><button class="btn ghost" data-act="copy">Copy my code</button><span class="msg" id="copymsg" role="status"></span></div>
     <textarea id="in" aria-label="Paste a code" placeholder="Paste a code you received"></textarea><div class="row"><button class="btn ghost" data-act="merge">Add their answers</button><span class="msg" id="mergemsg" role="status"></span></div></div></details>
   <details><summary>Guardrails</summary><div><ul><li>A person approves payments, hiring decisions and contracts. Always.</li><li>AI writes to your systems only after someone approves, until error rates are measured.</li><li>Use official connectors with the narrowest access that does the job.</li><li>Personal data stays within your DPDP Act obligations.</li><li>Measure rework, not only speed.</li></ul></div></details>
   <details><summary>How scores work</summary><div><p class="note">Each task has a benchmark for how much of it AI can carry today with a person reviewing. "Possible" is the average of those, weighted by where the team spends time. "In use" scales each task by how it gets done today. Hours a week = team size × 40 × the gap × 0.5, assuming half the gap is realistically captured. A quick win is a task AI can largely carry, in a team that scored 50% or more on setup.</p></div></details>
-  <details><summary>Start over</summary><div><div class="row"><button class="btn ghost" data-act="reset">Clear this audit</button></div></div></details></section>${state.sample?"":CTA}</div></div>`;
+  <details><summary>Start over</summary><div><div class="row"><button class="btn ghost" data-act="reset">Clear this audit</button></div></div></details></section></div></div>`;
 }
 
 const STEPS=["Work","Setup","Results"];
@@ -252,7 +251,7 @@ function bar(){
   if(v.startsWith("dept:"))right=`<span class="crumb"><button data-act="hub">${esc(state.company)||"Company"}</button><span>›</span>${DEPTS[v.slice(5)].name}</span>`;
   else if(v==="hub"||v==="setup")right=`<span>Department audit</span>`;
   else if(v==="cxo"||v==="cxoResult")right=`<span>Executive snapshot</span>`;
-  document.getElementById("bar").innerHTML=`<button class="brand" data-act="home" aria-label="Vajra AI enablement audit, home"><img src="/vajra-mark-dark.svg" alt="" width="28" height="28"><span class="wordmark">Vajra</span></button><span class="sep"></span><span class="prod">AI enablement audit</span><span style="flex:1"></span><span class="right">${right}<span id="savestate" class="saving"></span></span>`;
+  document.getElementById("bar").innerHTML=`<button class="brand" data-act="home" aria-label="AI enablement audit, home"><img src="/cii-mark.svg" alt="" width="40" height="26"><span class="wordmark">CII</span></button><span class="sep"></span><span class="prod">AI enablement research</span><span style="flex:1"></span><span class="right">${right}<span id="savestate" class="saving"></span></span>`;
   setSaveState(saveState);
 }
 function render(keepScroll){
@@ -294,7 +293,6 @@ function act(b){
   if(a==="ans"){const d=state.depts[state.view.slice(5)],i=+b.dataset.i,j=+b.dataset.j,kind=b.dataset.kind;
     if(kind==="r")d.r[i]=j;else{d.a[i]=d.a[i]||{};d.a[i][kind]=j;if(kind==="t"&&d.a[i].c==null)d.a[i].c=0;touch=i;}
     return render(true);}
-  if(a==="report"){if(b.disabled)return;if(b.dataset.kind==="department"&&state.sample)return;downloadReport(b.dataset.kind,b);return;}
   if(a==="sample"){wipe();state.company="Typical mid-size company";state.sample=true;state.selected=ORDER.slice();
     ORDER.forEach(k=>{const t=TYPICAL[k],d=state.depts[k];d.head=String(t.head);d.tools=t.tools;t.a.forEach((v,i)=>d.a[i]={t:v[0],c:v[1]});t.r.forEach((v,i)=>d.r[i]=v);d.step=2;});return go("hub");}
   if(a==="reset"){flush();wipe();return go("setup");}

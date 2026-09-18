@@ -1,4 +1,4 @@
-/* Vajra audit admin: OTP login, list, detail, CSV export. Data comes from /api/admin/* (server checks the session cookie). */
+/* CII research audit admin: OTP login, list, detail, CSV export. Data comes from /api/admin/* (server checks the session cookie). */
 const $ = (s) => document.querySelector(s);
 const escH = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 const fmtDate = (d) => d ? new Date(d).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
@@ -79,7 +79,7 @@ function viewList() {
   const companies = new Set(rows.map((x) => String(x.company).trim().toLowerCase())).size;
   const wk = rows.filter((x) => Date.now() - new Date(x.created_at) < 7 * 864e5).length;
   const reports = rows.filter(dl).length;
-  $('#root').innerHTML = `<div class="top"><div><div class="eyebrow">AI enablement audit</div><h1>Responses</h1></div>
+  $('#root').innerHTML = `<div class="top"><div><div class="eyebrow">AI enablement research</div><h1>Responses</h1></div>
     <button class="btn ghost" id="csv" ${filtered.length ? '' : 'disabled'}>Export CSV (${filtered.length})</button></div>
     <div class="kpis"><div class="kpi"><b>${rows.length}</b><span>Responses</span></div><div class="kpi"><b>${done}</b><span>Completed</span></div>
     <div class="kpi"><b>${reports}</b><span>Report downloads · hot leads</span></div><div class="kpi"><b>${companies}</b><span>Companies · ${wk} this week</span></div></div>
@@ -186,7 +186,7 @@ function exportCsv() {
   const cell = (v) => { let t = v == null ? '' : String(v); if (/^[=+\-@]/.test(t)) t = "'" + t; return /[",\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
   const csv = '﻿' + [head, ...lines].map((r) => r.map(cell).join(',')).join('\r\n');
   const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
-  const el = document.createElement('a'); el.href = url; el.download = `vajra-audit-responses-${new Date().toISOString().slice(0, 10)}.csv`;
+  const el = document.createElement('a'); el.href = url; el.download = `cii-audit-responses-${new Date().toISOString().slice(0, 10)}.csv`;
   document.body.appendChild(el); el.click(); el.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
