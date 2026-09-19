@@ -206,7 +206,6 @@ function vHub(){
   const sel=state.selected,sc=sel.map(k=>[k,score(k)]),done=sc.filter(r=>r[1]),hrs=done.reduce((s,r)=>s+(r[1].hours||0),0);
   const complete=sel.filter(k=>{const p=progress(k);return p.done===p.total;}).length;
   const all=[];done.forEach(([k,s])=>s.items.forEach(it=>{if(it.gap>0)all.push(it);}));all.sort((a,b)=>b.score-a.score);const top=all.slice(0,8);
-  let code="";try{code=btoa(unescape(encodeURIComponent(JSON.stringify({company:state.company,selected:state.selected,depts:state.depts}))));}catch(e){}
   const avg=f=>done.length?pct(done.reduce((s,r)=>s+r[1][f],0)/done.length):"–";
   return `${state.sample?`<div class="banner"><span>Sample: a typical mid-size company.</span><button class="btn" data-act="reset">Start my own</button></div>`:""}
   <div class="work"><aside class="viz">${chart(companyAxes(),"Company AI coverage by department")}${LEG("Possible","In use",L_TYP)}${stats3([avg("pot"),"possible"],[avg("obs"),"in use"],[hrs?Math.round(hrs):"–","hours a week"])}</aside>
@@ -217,9 +216,7 @@ function vHub(){
   <p style="margin-top:.8rem"><button class="link" data-act="setup">Add or remove teams</button></p>
   ${state.sample?"":complete===sel.length&&sel.length?CLOSING_NOTE:`<section class="block"><h3>Your report</h3><p class="help">Finish every team (${complete}/${sel.length} done) to unlock your report. Once complete, we'll compile your results and email you a detailed report shortly.</p></section>`}
   ${top.length?`<section class="block"><h3>Where to start</h3>${quad(top)}<div style="margin-top:.5rem">${oppList(top,true)}</div></section>`:""}
-  <section class="block"><details><summary>Collect answers from others</summary><div><p class="help">Answers stay in this browser. Each person copies their code and sends it to you.</p><textarea id="out" readonly aria-label="Answers code">${code}</textarea><div class="row"><button class="btn ghost" data-act="copy">Copy my code</button><span class="msg" id="copymsg" role="status"></span></div>
-    <textarea id="in" aria-label="Paste a code" placeholder="Paste a code you received"></textarea><div class="row"><button class="btn ghost" data-act="merge">Add their answers</button><span class="msg" id="mergemsg" role="status"></span></div></div></details>
-  <details><summary>Guardrails</summary><div><ul><li>A person approves payments, hiring decisions and contracts. Always.</li><li>AI writes to your systems only after someone approves, until error rates are measured.</li><li>Use official connectors with the narrowest access that does the job.</li><li>Personal data stays within your DPDP Act obligations.</li><li>Measure rework, not only speed.</li></ul></div></details>
+  <section class="block"><details><summary>Guardrails</summary><div><ul><li>A person approves payments, hiring decisions and contracts. Always.</li><li>AI writes to your systems only after someone approves, until error rates are measured.</li><li>Use official connectors with the narrowest access that does the job.</li><li>Personal data stays within your DPDP Act obligations.</li><li>Measure rework, not only speed.</li></ul></div></details>
   <details><summary>How scores work</summary><div><p class="note">Each task has a benchmark for how much of it AI can carry today with a person reviewing. "Possible" is the average of those, weighted by where the team spends time. "In use" scales each task by how it gets done today. Hours a week = team size × 40 × the gap × 0.5, assuming half the gap is realistically captured. A quick win is a task AI can largely carry, in a team that scored 50% or more on setup.</p></div></details>
   <details><summary>Start over</summary><div><div class="row"><button class="btn ghost" data-act="reset">Clear this audit</button></div></div></details></section></div></div>`;
 }
@@ -312,13 +309,6 @@ function act(b){
   if(a==="sample"){wipe();state.company="Typical mid-size company";state.sample=true;state.selected=ORDER.slice();
     ORDER.forEach(k=>{const t=TYPICAL[k],d=state.depts[k];d.head=String(t.head);d.tools=t.tools;t.a.forEach((v,i)=>d.a[i]={t:v[0],c:v[1]});t.r.forEach((v,i)=>d.r[i]=v);d.step=2;});return go("hub");}
   if(a==="reset"){flush();wipe();return go("setup");}
-  if(a==="copy"){const t=document.getElementById("out");t.select();let ok=false;try{ok=document.execCommand("copy");}catch(_){}
-    if(navigator.clipboard)navigator.clipboard.writeText(t.value).then(()=>{},()=>{});document.getElementById("copymsg").textContent=ok?"Copied":"Selected. Press Ctrl or Cmd + C.";return;}
-  if(a==="merge"){const m=document.getElementById("mergemsg");
-    try{const inc=JSON.parse(decodeURIComponent(escape(atob(document.getElementById("in").value.trim())))),got=[];
-      ORDER.forEach(k=>{const d=inc.depts&&inc.depts[k];if(d&&(Object.keys(d.a||{}).length||Object.keys(d.r||{}).length)){state.depts[k]=Object.assign(blank(),d);if(!state.selected.includes(k))state.selected.push(k);got.push(DEPTS[k].name);}});sortSel();
-      if(got.length){render(true);const d=document.querySelector("details");if(d)d.open=true;document.getElementById("mergemsg").textContent="Added "+got.join(", ");}else m.textContent="No answers in that code.";
-    }catch(_){m.style.color="var(--obs)";m.textContent="Couldn't read that code. Check all of it was pasted.";}return;}
 }
 document.addEventListener("click",e=>{const b=e.target.closest("[data-act]");if(b)act(b);});
 document.addEventListener("keydown",e=>{if(e.key!=="Enter")return;const t=e.target;
