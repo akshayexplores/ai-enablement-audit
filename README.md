@@ -1,13 +1,13 @@
-# CII · AI Enablement Research Audit
+# CII Kerala · AI Adoption Panel Survey
 
-A rebranded clone of the Vajra AI enablement audit, prepared in association with CII (Confederation of Indian Industry) as a research study for CII-affiliated founders. Same audit mechanics and scoring as the original; no Vajra branding, no consultation CTA, and submissions are kept in a completely separate set of database objects from the Vajra audit — even though both currently share the same Supabase project.
+A rebranded clone of the Vajra AI enablement audit, prepared in association with CII Kerala (Confederation of Indian Industry, Kerala) as a research study for CII Kerala-affiliated founders. Same audit mechanics and scoring as the original; no Vajra branding, no consultation CTA, and submissions are kept in a completely separate set of database objects from the Vajra audit — even though both currently share the same Supabase project.
 
 - **Audit:** `/` (Executive snapshot, 3 min · Department audit, 10 min per team)
 - **Admin:** `/admin` (email one-time-code login, restricted to a pre-defined list of emails · response list, detail view, CSV export, PDF report generation)
 
 ## How this differs from the Vajra audit
 
-- Branding: CII mark/wordmark, navy colour token in place of Vajra's green, no Vajra references anywhere in the UI or the generated PDF.
+- Branding: CII Kerala mark/wordmark, navy colour token in place of Vajra's green, no Vajra references anywhere in the UI or the generated PDF.
 - No self-serve "Download report (PDF)" button for visitors. On completion, the page tells them the team will email a detailed report. The admin panel can still generate and download the identical PDF (via `report.js` / `admin-report.js`) so it can be sent manually.
 - No "Book a consultation" / commercial CTA anywhere, in the app or in the PDF report.
 - Fully separate data: this app writes to `cii_audit_responses` and `cii_admin_otp` (not `audit_responses` / `vajra_admin_otp`), so it can safely share a Supabase project with the Vajra audit without any overlap.
@@ -17,7 +17,7 @@ A rebranded clone of the Vajra AI enablement audit, prepared in association with
 
 | Piece | What it does |
 |---|---|
-| `index.html`, `app.js`, `audit-data.js`, `styles.css` | The audit. Plain HTML/JS, no build step. CII-adapted brand. |
+| `index.html`, `app.js`, `audit-data.js`, `styles.css` | The audit. Plain HTML/JS, no build step. CII Kerala-adapted brand. |
 | `api/save.js` | Receives answers as people go and saves them. Validates everything. |
 | `api/admin/request-otp.js`, `api/admin/verify-otp.js` | Admin login: emails a 6-digit code to a pre-defined address, then exchanges the code for a signed, HttpOnly session cookie. |
 | `api/admin/logout.js`, `api/admin/responses.js` | Logout and the response list, both gated on that cookie. |
@@ -53,6 +53,6 @@ A rebranded clone of the Vajra AI enablement audit, prepared in association with
 
 Tasks, benchmarks, department ceilings and sources are in `audit-data.js` (`DEPTS`, `THEO`, `TYP`, `PROOF`, `CONNECT`) — unchanged from the Vajra audit, since the methodology itself isn't brand-specific.
 
-## Before this goes out to CII founders
+## Before this goes out to CII Kerala founders
 
-The on-page copy (privacy line, eyebrow text, footer attribution, closing message) uses reasonable defaults referencing "in association with CII" — review the exact wording in `index.html`, `app.js` and `report.js` before sharing this externally, since it's the wording founders will actually read.
+The on-page copy (privacy line, eyebrow text, footer attribution, closing message) uses reasonable defaults referencing "in association with CII Kerala" — review the exact wording in `index.html`, `app.js` and `report.js` before sharing this externally, since it's the wording founders will actually read.

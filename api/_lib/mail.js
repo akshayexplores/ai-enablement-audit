@@ -6,7 +6,7 @@ export function mailConfigured() {
 }
 
 export async function sendOtpEmail(email, code) {
-  const from = process.env.RESEND_FROM_EMAIL || 'CII Research Admin <onboarding@resend.dev>';
+  const from = process.env.RESEND_FROM_EMAIL || 'CII Kerala Research Admin <onboarding@resend.dev>';
   const r = await fetch(RESEND_URL, {
     method: 'POST',
     headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
