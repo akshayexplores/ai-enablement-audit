@@ -144,7 +144,7 @@ function vHome(){
   let resume="";
   if(started)resume+=`<div class="resume"><span>${esc(state.company)||"Department audit"}: ${doneN}/${state.selected.length} teams done</span><button class="btn" data-act="hub">Continue</button></div>`;
   if(state.cxo.done||state.cxo.step>0)resume+=`<div class="resume"><span>Executive snapshot${state.cxo.company?": "+esc(state.cxo.company):""}</span><button class="btn ghost" data-act="${state.cxo.done?"cxo-result":"cxo"}">${state.cxo.done?"Results":"Continue"}</button></div>`;
-  const theo=ORDER.reduce((s,k)=>s+THEO[k],0)/8,typ=ORDER.reduce((s,k)=>s+TYP[k],0)/8;
+  const theo=ORDER.reduce((s,k)=>s+THEO[k],0)/ORDER.length,typ=ORDER.reduce((s,k)=>s+TYP[k],0)/ORDER.length;
   const rays=`<svg class="rays" viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g stroke="#F3F0E8" stroke-width=".7" fill="none" opacity=".6">${[[1420,-60],[1480,60],[1540,200],[1540,340],[1500,500],[1440,640],[1360,720],[620,-120],[440,-40],[300,120],[520,700],[720,740]].map(q=>`<line x1="880" y1="300" x2="${q[0]}" y2="${q[1]}"/>`).join("")}<circle cx="880" cy="300" r="26"/><circle cx="880" cy="300" r="46" stroke-dasharray="2 5"/></g></svg>`;
   return `<div class="hero">${rays}<div><div class="eyebrow">AI Adoption Panel Survey · a CII Kerala research study</div><h1>How much of your work could AI do?</h1>
     <div class="lede"><span><b style="color:var(--pot)" data-count="${theo}">${pct(theo)}</b>of desk work is within reach of AI today</span><span><b style="color:var(--obs)" data-count="${typ}">${pct(typ)}</b>is what a typical company uses</span></div></div>
@@ -324,4 +324,5 @@ document.addEventListener("input",e=>{const f=e.target.dataset&&e.target.dataset
   save();});
 document.addEventListener("change",e=>{if(e.target.dataset&&e.target.dataset.rerender)render(true);});
 document.addEventListener("focusout",e=>{if(e.target.dataset&&e.target.dataset.f==="pemail"&&state.person.email&&!okEmail()){e.target.classList.add("bad");const er=document.getElementById("emailerr");if(er)er.textContent="Check this email address";}});
+document.addEventListener("focusout",e=>{});
 render();
