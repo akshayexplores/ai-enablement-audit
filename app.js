@@ -324,5 +324,4 @@ document.addEventListener("input",e=>{const f=e.target.dataset&&e.target.dataset
   save();});
 document.addEventListener("change",e=>{if(e.target.dataset&&e.target.dataset.rerender)render(true);});
 document.addEventListener("focusout",e=>{if(e.target.dataset&&e.target.dataset.f==="pemail"&&state.person.email&&!okEmail()){e.target.classList.add("bad");const er=document.getElementById("emailerr");if(er)er.textContent="Check this email address";}});
-document.addEventListener("focusout",e=>{});
 render();
