@@ -1,4 +1,4 @@
-/* CII AI enablement research: one-click branded PDF report (generated from the admin panel).
+/* CII Kerala AI Adoption Panel Survey: one-click branded PDF report (generated from the admin panel).
    Builds two A4 pages in a hidden container, renders them with html2canvas and packs them into a PDF with jsPDF.
    Libraries load from cdnjs only when someone clicks Download. Depends on globals from audit-data.js and app.js. */
 const LIBS = [
@@ -103,14 +103,14 @@ const RCSS = `
 `;
 
 function header(company, sub) {
-  return `<div class="band"><div class="brand" style="position:relative"><img data-svg="mark" src="${MARK_DARK}" alt=""><span class="wm">CII</span></div>
-    <div class="eb" style="margin-top:26px;position:relative">AI enablement research · report</div>
+  return `<div class="band"><div class="brand" style="position:relative"><img data-svg="mark" src="${MARK_DARK}" alt=""><span class="wm">CII Kerala</span></div>
+    <div class="eb" style="margin-top:26px;position:relative">AI Adoption Panel Survey · report</div>
     <h1 style="position:relative">${rEsc(company)}</h1>
     <div class="for" style="position:relative">${sub}</div></div>`;
 }
 function footer(n) {
-  return `<div class="foot"><span class="brand" style="display:flex;gap:8px;align-items:center"><img data-svg="mark" src="${MARK_DARK}" alt=""><span class="mono">CII</span></span>
-    <span class="mono">In association with CII</span><span class="mono">Page ${n} of 2</span></div>`;
+  return `<div class="foot"><span class="brand" style="display:flex;gap:8px;align-items:center"><img data-svg="mark" src="${MARK_DARK}" alt=""><span class="mono">CII Kerala</span></span>
+    <span class="mono">In association with CII Kerala</span><span class="mono">Page ${n} of 2</span></div>`;
 }
 const GUARDRAILS = `<ul><li>A person approves payments, hiring decisions and contracts. Always.</li><li>AI writes to your systems only after someone approves, until error rates are measured.</li><li>Use official connectors with the narrowest access that does the job.</li><li>Personal data stays within your DPDP Act obligations.</li><li>Measure rework, not only speed.</li></ul>`;
 const LEGEND = (b, r) => `<div class="leg"><span><i style="background:#0F3D73;border-radius:50%"></i>${b}</span><span><i style="background:#5C86B8"></i>${r}</span><span><i style="height:0;border-top:2px dashed #5C86B8;width:14px"></i>Typical company</span></div>`;
@@ -190,7 +190,7 @@ async function downloadReport(kind, btn, opts) {
       if (i) pdf.addPage();
       pdf.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, 210, 297);
     }
-    pdf.setProperties({ title: `CII AI enablement research · ${kind === "executive" ? state.cxo.company : state.company}`, author: "CII", subject: "AI enablement research report" });
+    pdf.setProperties({ title: `CII Kerala AI Adoption Panel Survey · ${kind === "executive" ? state.cxo.company : state.company}`, author: "CII Kerala", subject: "AI Adoption Panel Survey report" });
     const company = (kind === "executive" ? state.cxo.company : state.company).trim().replace(/[^\w\- ]+/g, "").replace(/\s+/g, "-") || "Company";
     pdf.save(`CII-AI-Audit-${company}.pdf`);
     if (!(opts && opts.track === false) && typeof markReport === "function") markReport(kind);
