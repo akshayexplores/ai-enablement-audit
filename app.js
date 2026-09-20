@@ -22,7 +22,7 @@ function detailsHtml(companyField,companyVal,enter){
   return `<div class="fields"><label class="field"><span>Your name</span><input type="text" data-f="pname" data-enter="${enter}" value="${esc(n)}" placeholder="Full name" autocomplete="name" autofocus></label>
   <label class="field"><span>Work email</span><input type="email" data-f="pemail" data-enter="${enter}" class="${showE?"bad":""}" value="${esc(e)}" placeholder="you@company.com" autocomplete="email"><span class="err" id="emailerr">${showE?"Check this email address":""}</span></label>
   <label class="field full"><span>Company</span><input class="big" type="text" data-f="${companyField}" data-enter="${enter}" value="${esc(companyVal)}" placeholder="Company name" autocomplete="organization"></label></div>
-  <p class="privacy">We save your answers as you go so you can pick up where you left off. This research study, prepared in association with CII, uses your name, email and answers to prepare your results and may contact you about them. We don't sell your data.</p>`;
+  <p class="privacy">We save your answers as you go so you can pick up where you left off. This research study, prepared in association with CII Kerala, uses your name, email and answers to prepare your results and may contact you about them. We don't sell your data.</p>`;
 }
 function execSummary(){
   const x=state.cxo,rows=ORDER.map(k=>[k,xscore(k)]).filter(r=>r[1]&&!r[1].absent);
@@ -146,7 +146,7 @@ function vHome(){
   if(state.cxo.done||state.cxo.step>0)resume+=`<div class="resume"><span>Executive snapshot${state.cxo.company?": "+esc(state.cxo.company):""}</span><button class="btn ghost" data-act="${state.cxo.done?"cxo-result":"cxo"}">${state.cxo.done?"Results":"Continue"}</button></div>`;
   const theo=ORDER.reduce((s,k)=>s+THEO[k],0)/8,typ=ORDER.reduce((s,k)=>s+TYP[k],0)/8;
   const rays=`<svg class="rays" viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g stroke="#F3F0E8" stroke-width=".7" fill="none" opacity=".6">${[[1420,-60],[1480,60],[1540,200],[1540,340],[1500,500],[1440,640],[1360,720],[620,-120],[440,-40],[300,120],[520,700],[720,740]].map(q=>`<line x1="880" y1="300" x2="${q[0]}" y2="${q[1]}"/>`).join("")}<circle cx="880" cy="300" r="26"/><circle cx="880" cy="300" r="46" stroke-dasharray="2 5"/></g></svg>`;
-  return `<div class="hero">${rays}<div><div class="eyebrow">AI enablement audit · a CII research study</div><h1>How much of your work could AI do?</h1>
+  return `<div class="hero">${rays}<div><div class="eyebrow">AI Adoption Panel Survey · a CII Kerala research study</div><h1>How much of your work could AI do?</h1>
     <div class="lede"><span><b style="color:var(--pot)" data-count="${theo}">${pct(theo)}</b>of desk work is within reach of AI today</span><span><b style="color:var(--obs)" data-count="${typ}">${pct(typ)}</b>is what a typical company uses</span></div></div>
     <div>${radar(homeAxes(),"AI potential versus typical adoption by department")}</div></div>
   <div class="paths">
@@ -249,7 +249,7 @@ function bar(){
   if(v.startsWith("dept:"))right=`<span class="crumb"><button data-act="hub">${esc(state.company)||"Company"}</button><span>›</span>${DEPTS[v.slice(5)].name}</span>`;
   else if(v==="hub"||v==="setup")right=`<span>Department audit</span>`;
   else if(v==="cxo"||v==="cxoResult")right=`<span>Executive snapshot</span>`;
-  document.getElementById("bar").innerHTML=`<button class="brand" data-act="home" aria-label="AI enablement audit, home"><img src="/cii-mark.svg" alt="" width="40" height="26"><span class="wordmark">CII</span></button><span class="sep"></span><span class="prod">AI enablement research</span><span style="flex:1"></span><span class="right">${right}<span id="savestate" class="saving"></span></span>`;
+  document.getElementById("bar").innerHTML=`<button class="brand" data-act="home" aria-label="AI Adoption Panel Survey, home"><img src="/cii-mark.svg" alt="" width="40" height="26"><span class="wordmark">CII Kerala</span></button><span class="sep"></span><span class="prod">AI Adoption Panel Survey</span><span style="flex:1"></span><span class="right">${right}<span id="savestate" class="saving"></span></span>`;
   setSaveState(saveState);
 }
 function animateCounts(root){
