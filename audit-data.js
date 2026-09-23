@@ -35,11 +35,19 @@ const DEPTS = {
     ["Writing and updating SOPs and process docs",.85,"Someone explains or records the process once; AI writes the SOP and keeps it current as the process changes."],
     ["Tracking projects, updating tasks, chasing owners",.8,"AI updates the tracker from messages and meetings and nudges owners on overdue items."],
     ["Tracking client deliverables against contract scope",.75,"AI reads each contract and the month's work log, then flags what is due, what is out of scope and what to bill."],
-    ["Procurement: comparing quotes, raising POs",.7,"AI compares vendor quotes on a like-for-like basis and drafts the PO for approval."],
     ["Meeting notes into action items into the tracker",.9,"Transcripts become decisions and tasks with owners and dates, written straight into your tracker."],
     ["Inventory, demand and capacity planning",.6,"AI projects demand from history and proposes reorder or staffing plans for a planner to adjust."],
     ["Quality checks and exception handling",.5,"AI runs the routine checks and routes exceptions with context attached."],
     ["Physical or on-site execution",.1,"Not addressable by language models. AI supports the paperwork around it."]]},
+  pr:{name:"Procurement",acts:[
+    ["Comparing vendor quotes and raising POs",.75,"AI normalizes quotes onto a like-for-like basis, flags the best-value option and drafts the PO for approval."],
+    ["Supplier onboarding and vendor records",.7,"AI collects onboarding documents, verifies details against your vendor master and keeps the record current."],
+    ["Matching invoices to POs and receipts",.85,"AI runs three-way matching automatically and only surfaces the exceptions that don't reconcile."],
+    ["Tracking contracts and price changes",.75,"AI reads supplier contracts, tracks negotiated pricing and flags when an invoice doesn't match the agreed rate."],
+    ["Spend analysis and category reporting",.8,"AI categorises spend across vendors and departments and writes the recurring report on where the money goes."],
+    ["Drafting and comparing RFQs and RFPs",.65,"AI drafts the requirements document and builds a side-by-side comparison once responses come in."],
+    ["Supplier risk and compliance checks",.55,"AI checks vendor certifications, insurance and compliance documents against requirements and flags gaps."],
+    ["Negotiation and supplier relationships",.2,"Human work. AI prepares the data and benchmarks that back the negotiation."]]},
   tr:{name:"Travel",acts:[
     ["Researching itineraries and comparing options",.85,"AI searches options against the traveller's calendar and your policy, and returns three ranked choices."],
     ["Booking flights, hotels and ground transport",.6,"AI prepares the booking up to the payment step. A person confirms and pays."],
@@ -68,6 +76,15 @@ const DEPTS = {
     ["Answering RFPs and security questionnaires",.8,"AI answers from your library of past responses and marks what needs a fresh answer."],
     ["Discovery calls, negotiation and closing",.25,"Human work. AI prepares the rep and handles the follow-up."],
     ["Ongoing account relationships",.3,"AI watches for signals and prepares reviews. People hold the relationship."]]},
+  ps:{name:"Presales",acts:[
+    ["Technical discovery and requirements gathering",.55,"AI drafts discovery questions from the account context and structures what prospects say into a requirements doc."],
+    ["Drafting solutions and proposals",.75,"AI turns discovery notes into a first-draft solution proposal on your template, using past deals as reference."],
+    ["Responding to RFPs and RFIs",.75,"AI answers from your library of past responses and flags questions that need a fresh, specific answer."],
+    ["Preparing demo environments and scripts",.6,"AI sets up demo data and drafts the walkthrough script tailored to what the prospect cares about."],
+    ["Competitive positioning research",.7,"AI tracks competitor moves, pricing and messaging and briefs the team before competitive deals."],
+    ["Pricing and solution configuration",.7,"AI configures pricing and packaging options against the deal's requirements and your rules."],
+    ["Setting up and supporting POCs and pilots",.4,"AI handles the environment setup and status tracking. Technical judgement during the pilot stays human."],
+    ["Stakeholder presentations",.25,"Human work. AI prepares the deck and talking points."]]},
   dv:{name:"Development",acts:[
     ["Writing feature code",.8,"Coding agents implement scoped tickets in your repo and open pull requests for review."],
     ["Code review",.75,"AI does the first review pass for bugs, security and style so people focus on design."],
@@ -79,16 +96,16 @@ const DEPTS = {
     ["Grooming tickets, writing specs, estimating",.7,"Vague requests become specs with acceptance criteria and a task breakdown."],
     ["Architecture and product decisions",.35,"AI lays out options and trade-offs. The decision stays with the team."]]}
 };
-const ORDER = ["mk","fi","hr","op","tr","ad","sa","dv"];
+const ORDER = ["mk","fi","hr","op","pr","tr","ad","sa","ps","dv"];
 
 /* Department ceilings and typical-company adoption.
    Development, Finance, Administration and Sales are anchored to Anthropic's "Labour Market Impacts of AI" (Mar 2026) occupational figures;
-   Marketing, HR, Travel and Operations are blended estimates. Edit here to recalibrate. */
-const THEO={mk:.85,fi:.90,hr:.82,op:.75,tr:.80,ad:.90,sa:.70,dv:.95};
-const TYP ={mk:.25,fi:.30,hr:.22,op:.25,tr:.20,ad:.30,sa:.28,dv:.40};
+   Marketing, HR, Travel, Operations, Procurement and Presales are blended estimates. Edit here to recalibrate. */
+const THEO={mk:.85,fi:.90,hr:.82,op:.75,pr:.78,tr:.80,ad:.90,sa:.70,ps:.72,dv:.95};
+const TYP ={mk:.25,fi:.30,hr:.22,op:.25,pr:.24,tr:.20,ad:.30,sa:.28,ps:.26,dv:.40};
 /* scale each department's activity benchmarks so their average meets the department ceiling */
 ORDER.forEach(k=>{const a=DEPTS[k].acts;for(let n=0;n<4;n++){const m=a.reduce((s,x)=>s+x[1],0)/a.length,f=THEO[k]/m;a.forEach(x=>x[1]=Math.min(.98,x[1]*f));}});
-const HITL={fi:[6,8],hr:[1,6,8],sa:[7],tr:[1]};
+const HITL={fi:[6,8],hr:[1,6,8],sa:[7],tr:[1],pr:[7],ps:[7]};
 const PROOF={
   dv:"85% of developers already use AI tools regularly. JetBrains, 2025",
   fi:"42% of finance activities can be fully automated. McKinsey",
@@ -96,26 +113,32 @@ const PROOF={
   mk:"Arts and media work is 84% addressable, 19% observed. Anthropic, 2026",
   hr:"Hiring is where HR gains most from AI. McKinsey",
   tr:"Booking, policy checks and claims are rule-based and already digital.",
-  op:"Procurement can run 25 to 40% more efficiently. McKinsey",
-  sa:"Sales work is 62% addressable, 27% observed. Anthropic, 2026"};
-const CONNECT={fi:"Zoho Books, Xero, Stripe",sa:"HubSpot, Salesforce, Zoho CRM",dv:"GitHub, Jira, Linear",ad:"Gmail, Outlook, Google Drive, Notion, Coda, Slack",mk:"Canva, Figma, HubSpot",hr:"Zoho People, Keka, Darwinbox (API or export)",tr:"Navan, Concur (API)",op:"NetSuite, SAP (API)"};
+  op:"Status reporting, SOPs and meeting follow-ups are structured and recurring — natural first wins for AI.",
+  pr:"Procurement can run 25 to 40% more efficiently. McKinsey",
+  sa:"Sales work is 62% addressable, 27% observed. Anthropic, 2026",
+  ps:"Presales blends structured drafting (proposals, RFPs) with technical judgement — a mixed automation profile."};
+const CONNECT={fi:"Zoho Books, Xero, Stripe",sa:"HubSpot, Salesforce, Zoho CRM",dv:"GitHub, Jira, Linear",ad:"Gmail, Outlook, Google Drive, Notion, Coda, Slack",mk:"Canva, Figma, HubSpot",hr:"Zoho People, Keka, Darwinbox (API or export)",tr:"Navan, Concur (API)",op:"NetSuite, SAP (API)",pr:"SAP Ariba, Coupa, Zoho Books",ps:"Salesforce, HubSpot (CPQ / proposal tools)"};
 const SHORT = {
   mk:["Content drafting","Repurposing","Reporting","SEO briefs","Market research","Email sequences","Design assets","Strategy","Events & partners"],
   fi:["Invoicing","Bills & expenses","Reconciliation","Collections","Month-end & MIS","Variance analysis","Payroll & filings","Cash forecasting","Audit & tax"],
   hr:["Job descriptions","Screening","Scheduling","Onboarding","Policy questions","Leave & attendance","Reviews","Training","Employee relations"],
-  op:["Status reports","SOPs","Task tracking","Scope tracking","Procurement","Meeting actions","Planning","Quality checks","On-site work"],
+  op:["Status reports","SOPs","Task tracking","Scope tracking","Meeting actions","Planning","Quality checks","On-site work"],
+  pr:["Quotes & POs","Vendor onboarding","Invoice matching","Contract tracking","Spend analysis","RFQ/RFP drafting","Supplier risk","Negotiation"],
   tr:["Itineraries","Bookings","Policy checks","Expense claims","Visas","Disruptions","Spend reports","Rate negotiation"],
   ad:["Inbox","Calendar","Documents","Data re-keying","Minutes","Date tracking","Facilities","Front desk"],
   sa:["Lead research","Outreach","CRM updates","Meeting prep","Proposals","Forecasting","RFPs","Closing","Accounts"],
+  ps:["Discovery","Proposals","RFP responses","Demo prep","Competitive intel","Pricing/config","POC support","Presentations"],
   dv:["Feature code","Code review","Tests","Debugging","Docs","Refactoring","CI/CD","Specs","Architecture"]};
 const ICON={
   mk:"M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1zM15 9a4 4 0 0 1 0 6M18 6a8 8 0 0 1 0 12",
   fi:"M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6",
   hr:"M16 19v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1M9.5 10a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM21 19v-1a4 4 0 0 0-3-3.87M15.5 3.13a3.5 3.5 0 0 1 0 6.75",
   op:"M3 3h6v6H3zM15 15h6v6h-6zM9 6h6a3 3 0 0 1 3 3v6",
+  pr:"M3 4h3l2 10h9l2-7H7M9 19a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM16 19a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z",
   tr:"M4 8h16v12H4zM9 8V5h6v3M4 13h16",
   ad:"M4 5h16v16H4zM4 10h16M8 3v4M16 3v4",
   sa:"M3 17l6-6 4 4 8-8M15 7h6v6",
+  ps:"M3 5h18v12H3zM8 20h8M12 17v3M7 13l3-3 3 2 4-5",
   dv:"M8 6l-6 6 6 6M16 6l6 6-6 6M14 4l-4 16",
   ok:"M5 12l5 5L20 7", user:"M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1", plug:"M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0zM12 18v4", quote:"M4 5h16v11H9l-5 4z"};
 const ico=(k,s)=>`<svg class="ic" width="${s||22}" height="${s||22}" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICON[k]}"/></svg>`;
@@ -140,8 +163,10 @@ const TYPICAL={
   mk:{head:5,tools:"Canva, Meta Ads, Google Analytics, Mailchimp",a:[[3,2],[2,2],[2,1],[1,1],[1,1],[2,1],[2,1],[1,1],[1,0]],r:[2,1,2,1,1]},
   fi:{head:4,tools:"Tally or Zoho Books, Excel, bank portals",a:[[2,2],[3,1],[3,1],[2,2],[3,1],[1,2],[2,1],[1,1],[1,0]],r:[2,3,2,2,1]},
   hr:{head:3,tools:"HRMS, LinkedIn, Naukri, Excel",a:[[1,2],[2,1],[2,1],[2,1],[2,1],[2,0],[1,1],[1,2],[2,0]],r:[1,2,2,1,1]},
-  op:{head:8,tools:"Excel, WhatsApp, email, project tracker",a:[[2,1],[1,2],[3,1],[2,1],[2,1],[2,2],[1,1],[2,0],[2,0]],r:[1,2,1,1,1]},
+  op:{head:8,tools:"Excel, WhatsApp, email, project tracker",a:[[2,1],[1,2],[3,1],[2,1],[2,2],[1,1],[2,0],[2,0]],r:[1,2,1,1,1]},
+  pr:{head:3,tools:"Excel, email, Tally or SAP, vendor portals",a:[[3,1],[2,1],[3,1],[2,1],[2,1],[1,1],[1,0],[2,0]],r:[1,2,2,1,1]},
   tr:{head:1,tools:"MakeMyTrip, travel agent, email",a:[[2,2],[3,0],[1,1],[2,1],[1,1],[2,0],[1,1],[0,0]],r:[1,2,2,0,1]},
   ad:{head:3,tools:"Outlook or Gmail, Word, Excel, shared drive",a:[[3,1],[2,1],[2,2],[3,1],[2,2],[1,1],[2,0],[2,0]],r:[1,2,2,0,1]},
   sa:{head:8,tools:"CRM, LinkedIn, email, PowerPoint",a:[[2,2],[3,2],[2,1],[1,2],[2,1],[1,1],[1,1],[3,0],[2,0]],r:[2,1,1,1,1]},
+  ps:{head:3,tools:"Salesforce or HubSpot, PowerPoint, demo environments",a:[[2,1],[3,1],[2,1],[2,1],[1,1],[2,1],[1,0],[2,0]],r:[2,1,1,1,1]},
   dv:{head:10,tools:"GitHub, Cursor, Jira, Slack",a:[[3,3],[2,1],[2,3],[2,1],[1,2],[1,2],[1,1],[1,1],[1,0]],r:[3,1,2,2,2]}};
